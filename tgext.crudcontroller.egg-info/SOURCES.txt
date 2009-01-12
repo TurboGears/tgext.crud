@@ -1,0 +1,13 @@
+README.txt
+setup.cfg
+setup.py
+tgext/__init__.py
+tgext.crudcontroller.egg-info/PKG-INFO
+tgext.crudcontroller.egg-info/SOURCES.txt
+tgext.crudcontroller.egg-info/dependency_links.txt
+tgext.crudcontroller.egg-info/entry_points.txt
+tgext.crudcontroller.egg-info/namespace_packages.txt
+tgext.crudcontroller.egg-info/requires.txt
+tgext.crudcontroller.egg-info/top_level.txt
+tgext.crudcontroller.egg-info/zip-safe
+tgext/crudcontroller/__init__.py
