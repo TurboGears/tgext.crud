@@ -1,6 +1,7 @@
 README.txt
 setup.cfg
 setup.py
+docs/HISTORY.txt
 tgext/__init__.py
 tgext.crudcontroller.egg-info/PKG-INFO
 tgext.crudcontroller.egg-info/SOURCES.txt
