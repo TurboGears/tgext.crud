@@ -1,15 +1,19 @@
 """
 """
-from tg import expose, flash, redirect
+from tg import expose, flash, redirect, validate
+from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 import pylons
 
 from sprox.saormprovider import SAORMProvider
+engine = 'genshi'
 try:
     import chameleon.genshi
-    engine = 'chameleon_genshi'
+    import pylons.config
+    if 'chameleon_genshi' in pylons.config['renderers']:
+        engine = 'chameleon_genshi'
 except ImportError:
-    engine = genshi
+    pass
 
 class CrudRestController(RestController):
     """
@@ -24,11 +28,13 @@ class CrudRestController(RestController):
 
     def __init__(self, session):
         self.provider = SAORMProvider(session)
+        self.session = session
 
         #assign the validators since they are none from the parent class
         self.post.decoration.validation.validators = self.new_form
         self.put.decoration.validation.validators  = self.edit_form
 
+    @with_trailing_slash
     @expose(engine+':tgext.crud.templates.get_all')
     @expose('json')
     def get_all(self, *args, **kw):
@@ -38,8 +44,6 @@ class CrudRestController(RestController):
         """
         if pylons.request.response_type == 'application/json':
             return self.table_filler.get_value(**kw)
-        if not pylons.request.url.endswith('/'):
-            redirect(pylons.request.url+'/')
         pylons.c.widget = self.table
         return dict(model=self.model.__name__)
 
@@ -56,7 +60,7 @@ class CrudRestController(RestController):
         value = self.edit_filler.get_value(kw)
         return dict(value=value)
 
-    @expose(engine+':tgext.templates.edit')
+    @expose(engine+':tgext.crud.templates.edit')
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
         pylons.c.widget = self.edit_form
@@ -65,14 +69,13 @@ class CrudRestController(RestController):
         for i, pk in  enumerate(pks):
             kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
-#        value['_method'] = 'PUT'
+        value['_method'] = 'PUT'
         return dict(value=value, model=self.model.__name__)
 
-    @expose(engine+':tgext.templates.new')
+    @without_trailing_slash
+    @expose(engine+':tgext.crud.templates.new')
     def new(self, *args, **kw):
         """Display a page to show a new record."""
-        if pylons.request.url.endswith('/'):
-            redirect(pylons.request.url[:-1])
         pylons.c.widget = self.new_form
         return dict(value=kw, model=self.model.__name__)
 
@@ -93,8 +96,8 @@ class CrudRestController(RestController):
     def post_delete(self, *args, **kw):
         """This is the code that actually deletes the record"""
         id = int(args[0])
-        obj = DBSession.query(self.model).get(id)
-        DBSession.delete(obj)
+        obj = self.session.query(self.model).get(id)
+        self.session.delete(obj)
         redirect('./')
 
     @expose(engine+':tgext.crud.templates.get_delete')
