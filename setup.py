@@ -3,9 +3,9 @@ import os
 
 version = '0.1'
 
-setup(name='tgext.crudcontroller',
+setup(name='tgext.crud',
       version=version,
-      description="Crud Controller Extension for T[TG2",
+      description="Crud Controller Extension for TG2",
       long_description=open("README.txt").read() + "\n" +
                        open(os.path.join("docs", "HISTORY.txt")).read(),
       # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
@@ -24,6 +24,9 @@ setup(name='tgext.crudcontroller',
       zip_safe=True,
       install_requires=[
           'setuptools',
+          'sprox',
+          'tw.dojo',
+          'tw.forms',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
