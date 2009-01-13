@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:py="http://genshi.edgewall.org/"
       xmlns:xi="http://www.w3.org/2001/XInclude">
+  <xi:include href="master.html" />
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Welcome to TurboGears 2.0, standing on the
@@ -10,14 +11,10 @@
 
 </head>
 <body class="tundra">
-  <div id="getting_started">
-&nbsp;
-<div>
+  <div id="main_content">
 <h1>$model Listing</h1>
-</div>
-<div>
 <a href='new/'>New</a> $model
-</div>
+<br/>
 <br/>
 ${tmpl_context.widget()}
 </div>
