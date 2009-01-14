@@ -1,9 +1,11 @@
 """
 """
-from tg import expose, flash, redirect, validate
+from tg import expose, flash, redirect
 from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 import pylons
+
+from decorators import registered_validate, register_validators, catch_crud_errors
 
 from sprox.saormprovider import SAORMProvider
 engine = 'genshi'
@@ -14,6 +16,7 @@ try:
         engine = 'chameleon_genshi'
 except ImportError:
     pass
+
 
 class CrudRestController(RestController):
     """
@@ -29,10 +32,11 @@ class CrudRestController(RestController):
     def __init__(self, session):
         self.provider = SAORMProvider(session)
         self.session = session
-
-        #assign the validators since they are none from the parent class
-        self.post.decoration.validation.validators = self.new_form
-        self.put.decoration.validation.validators  = self.edit_form
+        self.validators = {}
+        
+        #register the validators since they are none from the parent class
+        register_validators(self, 'post', self.new_form)
+        register_validators(self, 'put', self.edit_form)
 
     @with_trailing_slash
     @expose(engine+':tgext.crud.templates.get_all')
@@ -80,7 +84,13 @@ class CrudRestController(RestController):
         return dict(value=kw, model=self.model.__name__)
 
     @expose()
-    @validate(None, error_handler=edit)
+    @registered_validate(error_handler=new)
+    def post(self, *args, **kw):
+        self.provider.create(self.model, params=kw)
+        raise redirect('./')
+    
+    @expose()
+    @registered_validate(error_handler=edit)
     def put(self, *args, **kw):
         """update"""
         pks = self.provider.get_primary_fields(self.model)
@@ -105,8 +115,4 @@ class CrudRestController(RestController):
         """This is the code that creates a confirm_delete page"""
         return dict(args=args)
 
-    @expose()
-    @validate(None, error_handler=new)
-    def post(self, *args, **kw):
-        self.provider.create(self.model, params=kw)
-        raise redirect('./')
+
