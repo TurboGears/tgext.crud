@@ -5,7 +5,7 @@ from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 import pylons
 
-from decorators import registered_validate, register_validators, catch_crud_errors
+from decorators import registered_validate, register_validators, catch_errors
 
 from sprox.saormprovider import SAORMProvider
 engine = 'genshi'
