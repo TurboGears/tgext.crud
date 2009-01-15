@@ -17,14 +17,6 @@ try:
 except ImportError:
     pass
 
-
-def fix_params(params, kw):
-    for key, value in kw.iteritems():
-        if isinstance(value, list):
-            kw[key] = params.getall(key)
-    return kw
-
-
 class CrudRestController(RestController):
     """
     Set the following attributes in your child classes:
@@ -93,25 +85,19 @@ class CrudRestController(RestController):
     @expose()
     @registered_validate(error_handler=new)
     def post(self, *args, **kw):
-        params = pylons.request.params
-        params = fix_params(pylons.request.params, kw)
-
-        self.provider.create(self.model, params=params)
+        self.provider.create(self.model, params=kw)
         raise redirect('./')
     
     @expose()
     @registered_validate(error_handler=edit)
     def put(self, *args, **kw):
         """update"""
-        params = pylons.request.params
-        params = fix_params(pylons.request.params, kw)
-
         pks = self.provider.get_primary_fields(self.model)
         for i, pk in enumerate(pks):
             if pk not in kw and i < len(args):
-                params[pk] = args[i]
+                kw[pk] = args[i]
 
-        self.provider.update(self.model, params=params)
+        self.provider.update(self.model, params=kw)
         redirect('../')
 
     @expose()
