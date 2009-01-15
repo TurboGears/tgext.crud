@@ -27,7 +27,7 @@ class registered_validate(tgValidate):
     >>>         pylons.c.form = self.form
     >>>         return
     >>>     
-    >>>     @registered_validate
+    >>>     @registered_validate(error_controller=render_form)
     >>>     @expose()
     >>>     def eval_form(self):
     >>>         raise Exception
@@ -44,6 +44,9 @@ class registered_validate(tgValidate):
         self.validators = Validators()
         
 def register_validators(controller, name, validators):
+    """
+    Helper function which sets the validator lookup for the controller.
+    """
     if not hasattr(controller, '__validators__'):
         controller.__validators__ = {}
     controller.__validators__[name] = validators
