@@ -23,9 +23,9 @@ setup(name='tgext.crud',
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-          'setuptools',
+    #     'setuptools',
           'sprox',
-          'tw.dojo',
+        #  'tw.dojo',
           'tw.forms',
           # -*- Extra requirements: -*-
       ],
