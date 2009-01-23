@@ -12,7 +12,7 @@ engine = 'genshi'
 try:
     import chameleon.genshi
     import pylons.config
-    if 'chameleon_genshi' in pylons.config['renderers']:
+    if 'renderers' in pylons.config and 'chameleon_genshi' in pylons.config['renderers']:
         engine = 'chameleon_genshi'
 except ImportError:
     pass
@@ -47,8 +47,19 @@ class CrudRestController(RestController):
         """
         if pylons.request.response_type == 'application/json':
             return self.table_filler.get_value(**kw)
+        
+        values = []
+        try:
+            import tw.dojo
+            from sprox.dojo.tablebase import DojoTableBase as TableBase
+            from sprox.dojo.fillerbase import DojoTableFiller as TableFiller
+        except ImportError:
+            import warnings
+            warnings.warn("""tgext.crud does not support pagination without dojo, so for your safety we have limited the
+            number of records displayed to 10.""")
+            values = self.table_filler.get_value(limit=10)
         pylons.c.widget = self.table
-        return dict(model=self.model.__name__)
+        return dict(model=self.model.__name__, values=values)
 
     @expose(engine+':tgext.crud.templates.get_one')
     @expose('json')
