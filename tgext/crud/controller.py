@@ -55,8 +55,8 @@ class CrudRestController(RestController):
             from sprox.dojo.fillerbase import DojoTableFiller as TableFiller
         except ImportError:
             import warnings
-            warnings.warn("""tgext.crud does not support pagination without dojo, so for your safety we have limited the
-            number of records displayed to 10.""")
+            warnings.warn("tgext.crud does not support pagination without dojo,"\
+                          "so for your safety we have limited the number of records displayed to 10.""")
             values = self.table_filler.get_value(limit=10)
         pylons.c.widget = self.table
         return dict(model=self.model.__name__, values=values)
