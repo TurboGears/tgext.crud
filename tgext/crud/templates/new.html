@@ -7,11 +7,24 @@
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Welcome to TurboGears 2.0, standing on the
   shoulders of giants, since 2007</title>
-
+<style>
+#menu_items {
+  padding:0px 12px 0px 2px;
+  list-style-type:None
+  }
+</style>
 </head>
 <body class="tundra">
 &nbsp;
-<h1>New $model</h1>
-${XML(tmpl_context.widget(value=value, action='./'))}
+
+  <div style="float:left; padding-left:0px;">
+        <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
+            <li py:for="lower, item in sorted(tmpl_context.menu_items.iteritems())"><a href="../$lower">$item.__name__</a></li>
+       </ul>
+  </div>
+  <div style="float:left;">
+    <h1 style="margin-top:1px;">New $model</h1>
+     ${XML(tmpl_context.widget(value=value, action='./'))}
+  </div>
 </body>
 </html>

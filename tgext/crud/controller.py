@@ -19,19 +19,53 @@ except ImportError:
 
 class CrudRestController(RestController):
     """
-    Set the following attributes in your child classes:
-    table = None
-    table_filler = None
-    model = None
-    edit_form = None
-    edit_filler = None
-    new_form = None
-    """
+    :variables:
 
-    def __init__(self, session):
+    session 
+      database session (drives drop-down menus
+      
+    menu_items 
+      Dictionary of links to other models in the form model_items[lower_model_name] = Model
+    
+    :modifiers:
+    
+    table
+      Widget for the table display
+      
+    table_filler
+      Class instance with get_value() that defines the JSon stream for the table
+      
+    model
+      Model this class is associated with
+      
+    edit_form
+      Form to be used for editing the model
+      
+    edit_filler
+      Class instance with a get_value() that defines how we get information for a single 
+      existing record
+      
+    new_form
+      Form that defines how we create a form for new data entry.
+      
+    :Attributes:
+    
+      menu_items
+        Dictionary of associated Models (used for menu)
+      provider
+        sprox provider for data manipulation
+      session
+        link to the database
+    """
+    
+    def __before__(self, *args, **kw):
+        if self.menu_items:
+            pylons.c.menu_items = self.menu_items
+
+    def __init__(self, session, menu_items=None):
+        self.menu_items = menu_items
         self.provider = SAORMProvider(session)
         self.session = session
-        self.validators = {}
         
         #register the validators since they are none from the parent class
         register_validators(self, 'post', self.new_form)

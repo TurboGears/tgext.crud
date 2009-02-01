@@ -7,14 +7,28 @@
   <title>Welcome to TurboGears 2.0, standing on the
   shoulders of giants, since 2007</title>
 
+<style>
+#menu_items {
+  padding:0px 12px 0px 2px;
+  list-style-type:None
+  }
+</style>
 </head>
 <body class="tundra">
   <div id="main_content">
-<h1>$model Listing</h1>
-<a href='new/'>New</a> $model
-<br/>
-<br/>
-${XML(tmpl_context.widget(value=values, action='../'+model.lower()+'.json'))}
-</div>
+    <div style="float:left; padding-left:0px;">
+        <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
+            <li py:for="lower, item in sorted(tmpl_context.menu_items.iteritems())"><a href="../$lower">$item.__name__</a></li>
+        </ul>
+    </div>
+    <div style="float:left width: 80%">
+      <h1>$model Listing</h1>
+      <a href='new/'>New</a> $model
+      <div style="height:70%">
+      ${XML(tmpl_context.widget(value=values, action='../'+model.lower()+'.json'))}
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
