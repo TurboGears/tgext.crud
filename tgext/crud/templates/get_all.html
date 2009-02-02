@@ -15,6 +15,7 @@
 </style>
 </head>
 <body class="tundra">
+  <div style="height:0px;"> &nbsp; </div>
   <div id="main_content">
     <div style="float:left; padding-left:0px;">
         <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
@@ -22,9 +23,9 @@
         </ul>
     </div>
     <div style="float:left width: 80%">
-      <h1>$model Listing</h1>
+      <h1 style="margin-top:1px;">$model Listing</h1>
       <a href='new/'>New</a> $model
-      <div style="height:70%">
+      <div style="height:50%">
       ${XML(tmpl_context.widget(value=values, action='../'+model.lower()+'.json'))}
       </div>
     </div>

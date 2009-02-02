@@ -15,7 +15,7 @@
 </style>
 </head>
 <body class="tundra">
-&nbsp;
+  <div style="height:0px;"> &nbsp; </div>
 
   <div style="float:left; padding-left:0px;">
         <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
@@ -26,5 +26,6 @@
     <h1 style="margin-top:1px;">New $model</h1>
      ${XML(tmpl_context.widget(value=value, action='./'))}
   </div>
+  <div style="height:0px; clear:both;"> &nbsp; </div>
 </body>
 </html>
