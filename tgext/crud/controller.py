@@ -28,15 +28,15 @@ class CrudRestController(RestController):
       Dictionary of links to other models in the form model_items[lower_model_name] = Model
     
     :modifiers:
-    
+
+    model
+      Model this class is associated with
+
     table
       Widget for the table display
       
     table_filler
       Class instance with get_value() that defines the JSon stream for the table
-      
-    model
-      Model this class is associated with
       
     edit_form
       Form to be used for editing the model
@@ -59,17 +59,29 @@ class CrudRestController(RestController):
     """
     
     def __before__(self, *args, **kw):
-        if self.menu_items:
-            pylons.c.menu_items = self.menu_items
+        pylons.c.menu_items = self.menu_items
 
     def __init__(self, session, menu_items=None):
+        if menu_items is None:
+            menu_items = {}
         self.menu_items = menu_items
         self.provider = SAORMProvider(session)
         self.session = session
         
-        #register the validators since they are none from the parent class
-        register_validators(self, 'post', self.new_form)
-        register_validators(self, 'put', self.edit_form)
+        check_types = ['new_form', 'edit_form', 'table', 'table_filler', 'edit_filler']
+        
+        for type_ in check_types:
+            if not hasattr(self, type_) and hasattr(self, type_+'_type'):
+                setattr(self, type_, getattr(self, type_+'_type')(self.session))
+        
+        if hasattr(self, 'new_form_type'):
+            self.new_form = self.ne
+        
+        if hasattr(self, 'new_form'):
+            #register the validators since they are none from the parent class
+            register_validators(self, 'post', self.new_form)
+        if hasattr(self, 'edit_form'):
+            register_validators(self, 'put', self.edit_form)
 
     @with_trailing_slash
     @expose(engine+':tgext.crud.templates.get_all')
@@ -85,13 +97,12 @@ class CrudRestController(RestController):
         values = []
         try:
             import tw.dojo
-            from sprox.dojo.tablebase import DojoTableBase as TableBase
-            from sprox.dojo.fillerbase import DojoTableFiller as TableFiller
         except ImportError:
             import warnings
             warnings.warn("tgext.crud does not support pagination without dojo,"\
                           "so for your safety we have limited the number of records displayed to 10.""")
-            values = self.table_filler.get_value(limit=10)
+            kw['limit'] = 10
+        values = self.table_filler.get_value(**kw)
         pylons.c.widget = self.table
         return dict(model=self.model.__name__, values=values)
 
