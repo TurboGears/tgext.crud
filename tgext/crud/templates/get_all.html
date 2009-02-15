@@ -25,11 +25,12 @@
     <div style="float:left width: 80%">
       <h1 style="margin-top:1px;">$model Listing</h1>
       <a href='new/'>New</a> $model
-      <div style="height:50%">
+      <div style="height:50%; width:90%">
       ${XML(tmpl_context.widget(value=values, action='../'+model.lower()+'.json'))}
       </div>
     </div>
   </div>
+  <div style="clear:both;"/>
 
 </body>
 </html>

@@ -60,16 +60,16 @@ class CrudRestController(RestController):
     
     def __before__(self, *args, **kw):
         pylons.c.menu_items = self.menu_items
-
+        
     def __init__(self, session, menu_items=None):
         if menu_items is None:
             menu_items = {}
         self.menu_items = menu_items
         self.provider = SAORMProvider(session)
         self.session = session
-        
+
+        #this makes crc declarative
         check_types = ['new_form', 'edit_form', 'table', 'table_filler', 'edit_filler']
-        
         for type_ in check_types:
             if not hasattr(self, type_) and hasattr(self, type_+'_type'):
                 setattr(self, type_, getattr(self, type_+'_type')(self.session))
@@ -97,12 +97,13 @@ class CrudRestController(RestController):
         values = []
         try:
             import tw.dojo
+            print 'here'
         except ImportError:
             import warnings
             warnings.warn("tgext.crud does not support pagination without dojo,"\
                           "so for your safety we have limited the number of records displayed to 10.""")
             kw['limit'] = 10
-        values = self.table_filler.get_value(**kw)
+            values = self.table_filler.get_value(**kw)
         pylons.c.widget = self.table
         return dict(model=self.model.__name__, values=values)
 
