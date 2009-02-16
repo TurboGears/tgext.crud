@@ -74,9 +74,6 @@ class CrudRestController(RestController):
             if not hasattr(self, type_) and hasattr(self, type_+'_type'):
                 setattr(self, type_, getattr(self, type_+'_type')(self.session))
         
-        if hasattr(self, 'new_form_type'):
-            self.new_form = self.ne
-        
         if hasattr(self, 'new_form'):
             #register the validators since they are none from the parent class
             register_validators(self, 'post', self.new_form)
@@ -97,7 +94,6 @@ class CrudRestController(RestController):
         values = []
         try:
             import tw.dojo
-            print 'here'
         except ImportError:
             import warnings
             warnings.warn("tgext.crud does not support pagination without dojo,"\

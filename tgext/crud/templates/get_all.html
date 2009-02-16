@@ -3,10 +3,6 @@
       xmlns:xi="http://www.w3.org/2001/XInclude">
   <xi:include href="master.html" />
 <head>
-  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Welcome to TurboGears 2.0, standing on the
-  shoulders of giants, since 2007</title>
-
 <style>
 #menu_items {
   padding:0px 12px 0px 2px;
@@ -26,7 +22,7 @@
       <h1 style="margin-top:1px;">$model Listing</h1>
       <a href='new/'>New</a> $model
       <div style="height:50%; width:90%">
-      ${XML(tmpl_context.widget(value=values, action='../'+model.lower()+'.json'))}
+      ${XML(tmpl_context.widget(value=values, action='../'+model.lower()+'s.json'))}
       </div>
     </div>
   </div>
