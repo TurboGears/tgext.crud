@@ -160,7 +160,7 @@ class CrudRestController(RestController):
     @expose()
     def post_delete(self, *args, **kw):
         """This is the code that actually deletes the record"""
-        id = int(args[0])
+        id = args[0]
         obj = self.session.query(self.model).get(id)
         self.session.delete(obj)
         redirect('./')
