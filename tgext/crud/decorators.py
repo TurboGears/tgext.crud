@@ -36,7 +36,7 @@ class registered_validate(tgValidate):
         self.error_handler = error_handler
         self.needs_controller = True
         class Validators(object):
-            def validate(self, controller, params):
+            def validate(self, controller, params, state):
                 func_name = controller.im_func.__name__
                 validators = controller.im_self.__validators__
                 if func_name in validators:
