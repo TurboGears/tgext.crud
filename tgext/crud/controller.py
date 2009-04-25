@@ -1,6 +1,6 @@
 """
 """
-from tg import expose, flash, redirect
+from tg import expose, flash, redirect, tmpl_context
 from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 import pylons
@@ -17,16 +17,28 @@ try:
 except ImportError:
     pass
 
+try:
+    import tw.dojo
+except ImportError:
+    use_paginate = True
+    from tg.decorators import paginate
+else:
+    # if dojo ist installed, we don't need pagination
+    use_paginate = False
+    def paginate(*args, **kw):
+        return lambda f: f
+
+
 class CrudRestController(RestController):
     """
     :variables:
 
-    session 
+    session
       database session (drives drop-down menus
-      
-    menu_items 
+
+    menu_items
       Dictionary of links to other models in the form model_items[lower_model_name] = Model
-    
+
     :modifiers:
 
     model
@@ -34,22 +46,22 @@ class CrudRestController(RestController):
 
     table
       Widget for the table display
-      
+
     table_filler
       Class instance with get_value() that defines the JSon stream for the table
-      
+
     edit_form
       Form to be used for editing the model
-      
+
     edit_filler
-      Class instance with a get_value() that defines how we get information for a single 
+      Class instance with a get_value() that defines how we get information for a single
       existing record
-      
+
     new_form
       Form that defines how we create a form for new data entry.
-      
+
     :Attributes:
-    
+
       menu_items
         Dictionary of associated Models (used for menu)
       provider
@@ -57,10 +69,10 @@ class CrudRestController(RestController):
       session
         link to the database
     """
-    
+
     def __before__(self, *args, **kw):
-        pylons.c.menu_items = self.menu_items
-        
+        tmpl_context.menu_items = self.menu_items
+
     def __init__(self, session, menu_items=None):
         if menu_items is None:
             menu_items = {}
@@ -73,7 +85,7 @@ class CrudRestController(RestController):
         for type_ in check_types:
             if not hasattr(self, type_) and hasattr(self, type_+'_type'):
                 setattr(self, type_, getattr(self, type_+'_type')(self.session))
-        
+
         if hasattr(self, 'new_form'):
             #register the validators since they are none from the parent class
             register_validators(self, 'post', self.new_form)
@@ -83,6 +95,7 @@ class CrudRestController(RestController):
     @with_trailing_slash
     @expose(engine+':tgext.crud.templates.get_all')
     @expose('json')
+    @paginate('value_list', items_per_page=7)
     def get_all(self, *args, **kw):
         """Return all records.
            Pagination is done by offset/limit in the filler method.
@@ -90,25 +103,21 @@ class CrudRestController(RestController):
         """
         if pylons.request.response_type == 'application/json':
             return self.table_filler.get_value(**kw)
-        
-        values = []
-        try:
-            import tw.dojo
-        except ImportError:
-            import warnings
-            warnings.warn("tgext.crud does not support pagination without dojo,"\
-                          "so for your safety we have limited the number of records displayed to 10.""")
-            kw['limit'] = 10
+
+        if use_paginate:
             values = self.table_filler.get_value(**kw)
-        pylons.c.widget = self.table
-        return dict(model=self.model.__name__, values=values)
+        else:
+            values = []
+            tmpl_context.paginators = None
+        tmpl_context.widget = self.table
+        return dict(model=self.model.__name__, value_list=values)
 
     @expose(engine+':tgext.crud.templates.get_one')
     @expose('json')
     def get_one(self, *args, **kw):
         """get one record, returns HTML or json"""
         #this would probably only be realized as a json stream
-        pylons.c.widget = self.edit_form
+        tmpl_context.widget = self.edit_form
         pks = self.provider.get_primary_fields(self.model)
         kw = {}
         for i, pk in  enumerate(pks):
@@ -119,7 +128,7 @@ class CrudRestController(RestController):
     @expose(engine+':tgext.crud.templates.edit')
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
-        pylons.c.widget = self.edit_form
+        tmpl_context.widget = self.edit_form
         pks = self.provider.get_primary_fields(self.model)
         kw = {}
         for i, pk in  enumerate(pks):
@@ -132,7 +141,7 @@ class CrudRestController(RestController):
     @expose(engine+':tgext.crud.templates.new')
     def new(self, *args, **kw):
         """Display a page to show a new record."""
-        pylons.c.widget = self.new_form
+        tmpl_context.widget = self.new_form
         return dict(value=kw, model=self.model.__name__)
 
     @expose()
@@ -140,7 +149,7 @@ class CrudRestController(RestController):
     def post(self, *args, **kw):
         self.provider.create(self.model, params=kw)
         raise redirect('./')
-    
+
     @expose()
     @registered_validate(error_handler=edit)
     def put(self, *args, **kw):
@@ -165,5 +174,4 @@ class CrudRestController(RestController):
     def get_delete(self, *args, **kw):
         """This is the code that creates a confirm_delete page"""
         return dict(args=args)
-
 
