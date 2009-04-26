@@ -6,16 +6,7 @@ from tg.controllers import RestController
 import pylons
 
 from decorators import registered_validate, register_validators, catch_errors
-
 from sprox.saormprovider import SAORMProvider
-engine = 'genshi'
-try:
-    import chameleon.genshi
-    import pylons.config
-    if 'renderers' in pylons.config and 'chameleon_genshi' in pylons.config['renderers']:
-        engine = 'chameleon_genshi'
-except ImportError:
-    pass
 
 try:
     import tw.dojo
@@ -93,7 +84,7 @@ class CrudRestController(RestController):
             register_validators(self, 'put', self.edit_form)
 
     @with_trailing_slash
-    @expose(engine+':tgext.crud.templates.get_all')
+    @expose('tgext.crud.templates.get_all')
     @expose('json')
     @paginate('value_list', items_per_page=7)
     def get_all(self, *args, **kw):
@@ -112,7 +103,7 @@ class CrudRestController(RestController):
         tmpl_context.widget = self.table
         return dict(model=self.model.__name__, value_list=values)
 
-    @expose(engine+':tgext.crud.templates.get_one')
+    @expose('tgext.crud.templates.get_one')
     @expose('json')
     def get_one(self, *args, **kw):
         """get one record, returns HTML or json"""
@@ -125,7 +116,7 @@ class CrudRestController(RestController):
         value = self.edit_filler.get_value(kw)
         return dict(value=value)
 
-    @expose(engine+':tgext.crud.templates.edit')
+    @expose('tgext.crud.templates.edit')
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
         tmpl_context.widget = self.edit_form
@@ -138,7 +129,7 @@ class CrudRestController(RestController):
         return dict(value=value, model=self.model.__name__)
 
     @without_trailing_slash
-    @expose(engine+':tgext.crud.templates.new')
+    @expose('tgext.crud.templates.new')
     def new(self, *args, **kw):
         """Display a page to show a new record."""
         tmpl_context.widget = self.new_form
@@ -170,7 +161,7 @@ class CrudRestController(RestController):
         self.session.delete(obj)
         redirect('./')
 
-    @expose(engine+':tgext.crud.templates.get_delete')
+    @expose('tgext.crud.templates.get_delete')
     def get_delete(self, *args, **kw):
         """This is the code that creates a confirm_delete page"""
         return dict(args=args)
