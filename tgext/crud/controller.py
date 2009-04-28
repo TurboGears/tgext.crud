@@ -62,6 +62,10 @@ class CrudRestController(RestController):
     """
 
     def __before__(self, *args, **kw):
+        # this will be removed in 2.1.*
+        tmpl_context.menu_items = self.menu_items
+
+    def _before(self, *args, **kw):
         tmpl_context.menu_items = self.menu_items
 
     def __init__(self, session, menu_items=None):
