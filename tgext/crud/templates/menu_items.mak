@@ -9,21 +9,11 @@
 </style>
 </%def>
 
-<%def name="menu_items()">
+<%def name="menu_items(path='../')">
     <div id="menu_items">
         % if hasattr(tmpl_context, 'menu_items'):
            % for lower, item in sorted(tmpl_context.menu_items.iteritems()):
-            <li><a href="../${lower}s">${item.__name__}</a></li>
-           % endfor
-        % endif
-        </ul>
-    </div>
-</%def>
-<%def name="sub_menu_items()">
-    <div id="menu_items">
-        % if hasattr(tmpl_context, 'menu_items'):
-           % for lower, item in sorted(tmpl_context.menu_items.iteritems()):
-            <li><a href="../../${lower}s">${item.__name__}</a></li>
+            <li><a href="${path}${lower}s">${item.__name__}</a></li>
            % endfor
         % endif
         </ul>
