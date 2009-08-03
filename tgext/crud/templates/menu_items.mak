@@ -11,6 +11,7 @@
 
 <%def name="menu_items(path='../')">
     <div id="menu_items">
+        <ul>
         % if hasattr(tmpl_context, 'menu_items'):
            % for lower, item in sorted(tmpl_context.menu_items.iteritems()):
             <li><a href="${path}${lower}s">${item.__name__}</a></li>
