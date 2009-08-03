@@ -14,7 +14,7 @@ TurboGears Admin System - ${model}
     ${menu_items.menu_items('../../')}
   <div style="float:left;">
     <h2 style="margin-top:1px;">Edit ${model}</h2>
-     ${tmpl_context.widget(value=value, action='./?_method=PUT') | n}
+     ${tmpl_context.widget(value=value, action='./') | n}
   </div>
   <div style="height:0px; clear:both;"> &nbsp; </div>
   </div> <!-- end main_content -->
