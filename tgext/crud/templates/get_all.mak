@@ -19,7 +19,7 @@ ${parent.header()}
           <span>${tmpl_context.paginators.value_list.pager()}>
          % endif
     </div>
-    ${tmpl_context.widget(engine="genshi", value=value_list, action='../'+model.lower()+'s.json', attrs="height:200px; border:solid black 3px;") |n}
+    ${tmpl_context.widget(engine="genshi", value=value_list, action='../'+model.lower()+'s.json') |n}
   </div>
 </div>
 <div style="clear:both;"/>
