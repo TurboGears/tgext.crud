@@ -6,7 +6,7 @@ from tg.controllers import RestController
 import pylons
 
 from decorators import registered_validate, register_validators, catch_errors
-from sprox.saormprovider import SAORMProvider
+from sprox.providerselector import ProviderTypeSelector
 
 try:
     import tw.dojo
@@ -60,7 +60,11 @@ class CrudRestController(RestController):
       session
         link to the database
     """
-
+    
+    
+    #def _before(self, *args, **kw):
+    #    tmpl_context.menu_items = self.menu_items
+        
     def __before__(self, *args, **kw):
         # this will be removed in 2.1.*
         tmpl_context.menu_items = self.menu_items
@@ -72,7 +76,8 @@ class CrudRestController(RestController):
         if menu_items is None:
             menu_items = {}
         self.menu_items = menu_items
-        self.provider = SAORMProvider(session)
+        self.provider = ProviderTypeSelector().get_selector(self.model).get_provider()
+
         self.session = session
 
         #this makes crc declarative
@@ -160,9 +165,11 @@ class CrudRestController(RestController):
     @expose()
     def post_delete(self, *args, **kw):
         """This is the code that actually deletes the record"""
-        id = args[0]
-        obj = self.session.query(self.model).get(id)
-        self.session.delete(obj)
+        pks = self.provider.get_primary_fields(self.model)
+        d = {}
+        for i, arg in enumerate(args):
+            d[pks[i]] = arg
+        self.provider.delete(self.model, d)
         redirect('./')
 
     @expose('tgext.crud.templates.get_delete')
