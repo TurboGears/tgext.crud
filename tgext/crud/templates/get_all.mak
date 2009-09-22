@@ -9,7 +9,6 @@ ${menu_items.menu_style()}
 ${parent.header()}
 </%def>
 <%def name="body_class()">tundra</%def>
-<%def name="content()">
   <div id="main_content">
     ${menu_items.menu_items()}
     <div style="float:left; width:80%">
@@ -20,9 +19,8 @@ ${parent.header()}
             <span>${tmpl_context.paginators.value_list.pager()}>
            % endif
       </div>
-      ${tmpl_context.widget(value=value_list, action='../'+model.lower()+'s.json', attrs="height:200px; border:solid black 3px;") |n}
+     ${tmpl_context.widget(value=value_list, action='../'+model.lower()+'s.json', attrs=dict(style="height:200px; border:solid black 3px;")) |n}
     </div>
-    ${tmpl_context.widget(engine="genshi", value=value_list, action='../'+model.lower()+'s.json') |n}
   </div>
 </div>
 <div style="clear:both;"/>
