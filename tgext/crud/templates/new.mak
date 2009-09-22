@@ -2,7 +2,7 @@
 <%namespace name="menu_items" file="tgext.crud.templates.menu_items"/>
 
 <%def name="title()">
-TurboGears Admin System - ${model}
+${tmpl_context.title} - New ${model}
 </%def>
 <%def name="header()">
   ${menu_items.menu_style()}
