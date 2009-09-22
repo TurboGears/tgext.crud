@@ -79,7 +79,7 @@ class CrudRestController(RestController):
         if menu_items is None:
             menu_items = {}
         self.menu_items = menu_items
-        self.provider = ProviderTypeSelector().get_selector(self.model).get_provider()
+        self.provider = ProviderTypeSelector().get_selector(self.model).get_provider(self.model, hint=session)
 
         self.session = session
 
