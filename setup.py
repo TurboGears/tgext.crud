@@ -1,13 +1,20 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.3'
+version = '0.3.2'
+
+here = os.path.abspath(os.path.dirname(__file__))
+try:
+    README = open(os.path.join(here, 'README.txt')).read()
+    CHANGES = open(os.path.join(here, 'docs/HISTORY.txt')).read()
+except IOError:
+    README = CHANGES = ''
 
 setup(name='tgext.crud',
       version=version,
       description="Crud Controller Extension for TG2",
-      long_description=open("README.txt").read() + "\n" +
-                       open(os.path.join("docs", "HISTORY.txt")).read(),
+      long_description=README + "\n" +
+                       CHANGES,
       # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
         "Programming Language :: Python",
