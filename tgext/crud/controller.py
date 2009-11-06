@@ -126,7 +126,7 @@ class CrudRestController(RestController):
         for i, pk in  enumerate(pks):
             kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
-        return dict(value=value)
+        return dict(value=value,model=self.model.__name__)
 
     @expose('tgext.crud.templates.edit')
     def edit(self, *args, **kw):
