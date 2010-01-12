@@ -29,7 +29,7 @@ class CrudRestController(RestController):
 
     menu_items
       Dictionary of links to other models in the form model_items[lower_model_name] = Model
-      
+
     title
       Title to be used for each page.  default: Turbogears Admin System
 
@@ -63,13 +63,13 @@ class CrudRestController(RestController):
       session
         link to the database
     """
-    
+
     title = "Turbogears Admin System"
-    
-    #def _before(self, *args, **kw):
-    #    tmpl_context.title = self.title
-    #    tmpl_context.menu_items = self.menu_items
-        
+
+    def _before(self, *args, **kw):
+        tmpl_context.title = self.title
+        tmpl_context.menu_items = self.menu_items
+
     def __before__(self, *args, **kw):
         # this will be removed in 2.1.*
         tmpl_context.menu_items = self.menu_items
