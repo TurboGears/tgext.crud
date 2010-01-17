@@ -138,7 +138,7 @@ class CrudRestController(RestController):
             kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
         value['_method'] = 'PUT'
-        return dict(value=value, model=self.model.__name__)
+        return dict(value=value, model=self.model.__name__, pk_count=len(pks))
 
     @without_trailing_slash
     @expose('tgext.crud.templates.new')
@@ -163,7 +163,7 @@ class CrudRestController(RestController):
                 kw[pk] = args[i]
 
         self.provider.update(self.model, params=kw)
-        redirect('../')
+        redirect('../' * len(pks))
 
     @expose()
     def post_delete(self, *args, **kw):
@@ -173,7 +173,7 @@ class CrudRestController(RestController):
         for i, arg in enumerate(args):
             d[pks[i]] = arg
         self.provider.delete(self.model, d)
-        redirect('./')
+        redirect('./' + '../' * (len(pks) - 1))
 
     @expose('tgext.crud.templates.get_delete')
     def get_delete(self, *args, **kw):
