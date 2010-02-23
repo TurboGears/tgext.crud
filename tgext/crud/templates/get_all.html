@@ -23,8 +23,7 @@
       <h1 style="margin-top:1px;">$model Listing</h1>
       <div style="margin:1ex 0; width:90%">
         <a href='new/'>New</a> $model
-        <span py:if="tmpl_context.paginators" style="margin-left:2em"
-        py:content="tmpl_context.paginators.value_list.pager()"/>
+        <span py:if="tmpl_context.paginators" style="margin-left:2em" py:content="tmpl_context.paginators.value_list.pager(link='./%ss'%model.lower())"/>
       </div>
       <div style="height:50%; width:90%">
       ${XML(tmpl_context.widget(value=value_list, action='../'+model.lower()+'s.json'))}

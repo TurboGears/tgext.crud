@@ -16,7 +16,7 @@ ${parent.header()}
     <div style="margin:1ex 0; width:90%">
       <a href='new/'>New</a> ${model}
          % if tmpl_context.paginators:
-          <span>${tmpl_context.paginators.value_list.pager()}>
+          <span>${tmpl_context.paginators.value_list.pager(link='./%ss'%model.lower())}>
          % endif
     </div>
      ${tmpl_context.widget(value=value_list, action='../'+model.lower()+'s.json', attrs=dict(style="height:200px; border:solid black 3px;")) |n}
