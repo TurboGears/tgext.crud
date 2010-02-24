@@ -12,12 +12,13 @@ try:
     import tw.dojo
 except ImportError:
     use_paginate = True
-    from tg.decorators import paginate
-else:
+
+from tg.decorators import paginate
+#else:
     # if dojo ist installed, we don't need pagination
-    use_paginate = False
-    def paginate(*args, **kw):
-        return lambda f: f
+    #use_paginate = False
+    #def paginate(*args, **kw):
+    #    return lambda f: f
 
 
 class CrudRestController(RestController):
@@ -107,7 +108,8 @@ class CrudRestController(RestController):
         if pylons.request.response_type == 'application/json':
             return self.table_filler.get_value(**kw)
 
-        if use_paginate:
+        if not getattr(self.table.__class__, '__retrieves_own_value__', False):
+            print '*'*80
             values = self.table_filler.get_value(**kw)
         else:
             values = []
