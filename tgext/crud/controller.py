@@ -8,6 +8,13 @@ import pylons
 from decorators import registered_validate, register_validators, catch_errors
 from sprox.providerselector import ProviderTypeSelector
 
+errors = ()
+try:
+    from sqlalchemy.exc import IntegrityError, DatabaseError, ProgrammingError
+    errors =  (IntegrityError, DatabaseError, ProgrammingError)
+except ImportError:
+    pass
+
 try:
     import tw.dojo
 except ImportError:
@@ -147,6 +154,7 @@ class CrudRestController(RestController):
         tmpl_context.widget = self.new_form
         return dict(value=kw, model=self.model.__name__)
 
+    @catch_errors(errors, error_handler=new)
     @expose()
     @registered_validate(error_handler=new)
     def post(self, *args, **kw):
@@ -155,6 +163,7 @@ class CrudRestController(RestController):
 
     @expose()
     @registered_validate(error_handler=edit)
+    @catch_errors(errors, error_handler=edit)
     def put(self, *args, **kw):
         """update"""
         pks = self.provider.get_primary_fields(self.model)

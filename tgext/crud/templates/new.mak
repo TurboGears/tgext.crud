@@ -1,4 +1,4 @@
-<%inherit file="app:templates.master"/>
+<%inherit file="local:templates.master"/>
 <%namespace name="menu_items" file="tgext.crud.templates.menu_items"/>
 
 <%def name="title()">

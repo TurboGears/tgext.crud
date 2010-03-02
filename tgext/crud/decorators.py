@@ -3,6 +3,7 @@
 from decorator import decorator
 from tg.decorators import validate as tgValidate
 from tg import flash
+import transaction
 
 class registered_validate(tgValidate):
     """
@@ -86,7 +87,13 @@ def catch_errors(error_types=None, error_handler=None):
                     message=None
             if message:
                 flash(message,status="status_alert")
-                return self._perform_call(None, dict(url=error_handler.__name__+'/'+'/'.join(args), params=kwargs))
+                func = error_handler
+                func.im_func = error_handler
+                func.im_self = self
+                func.im_controller = self
+                return func.im_controller._call(func, params=kwargs, remainder=[self, args])
+
+#                return self._perform_call(None, dict(url=error_handler.__name__+'/'+'/'.join(args), params=kwargs))
         return value
     return decorator(wrapper)
 
