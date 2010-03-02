@@ -104,12 +104,11 @@ class CrudRestController(RestController):
         """Return all records.
            Pagination is done by offset/limit in the filler method.
            Returns an HTML page with the records if not json.
-        """   
+        """
         if pylons.request.response_type == 'application/json':
             return self.table_filler.get_value(**kw)
 
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
-            print '*'*80
             values = self.table_filler.get_value(**kw)
         else:
             values = []
