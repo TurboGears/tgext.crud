@@ -16,10 +16,12 @@
   <div style="height:0px;"> &nbsp; </div>
   <div style="float:left; padding-left:0px;">
         <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
-            <li py:for="lower, item in sorted(tmpl_context.menu_items.iteritems())"><a href="../../${lower}s/">$item.__name__</a></li>
+            <li py:for="lower, item in sorted(tmpl_context.menu_items.iteritems())">
+              <a href="${'../' * (1 + value_of('pk_count', 1))}${lower}s/">$item.__name__</a>
+            </li>
        </ul>
   </div>
-  <div style="float:left;">
+  <div style="float:left;" class="crud_edit">
     <h2 style="margin-top:1px;">Edit $model</h2>
      ${XML(tmpl_context.widget(value=value, action='./'))}
   </div>

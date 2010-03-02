@@ -19,12 +19,13 @@ try:
     import tw.dojo
 except ImportError:
     use_paginate = True
-    from tg.decorators import paginate
-else:
+
+from tg.decorators import paginate
+#else:
     # if dojo ist installed, we don't need pagination
-    use_paginate = False
-    def paginate(*args, **kw):
-        return lambda f: f
+    #use_paginate = False
+    #def paginate(*args, **kw):
+    #    return lambda f: f
 
 
 class CrudRestController(RestController):
@@ -36,7 +37,7 @@ class CrudRestController(RestController):
 
     menu_items
       Dictionary of links to other models in the form model_items[lower_model_name] = Model
-      
+
     title
       Title to be used for each page.  default: Turbogears Admin System
 
@@ -70,13 +71,13 @@ class CrudRestController(RestController):
       session
         link to the database
     """
-    
+
     title = "Turbogears Admin System"
-    
-    #def _before(self, *args, **kw):
-    #    tmpl_context.title = self.title
-    #    tmpl_context.menu_items = self.menu_items
-        
+
+    def _before(self, *args, **kw):
+        tmpl_context.title = self.title
+        tmpl_context.menu_items = self.menu_items
+
     def __before__(self, *args, **kw):
         # this will be removed in 2.1.*
         tmpl_context.menu_items = self.menu_items
@@ -114,7 +115,7 @@ class CrudRestController(RestController):
         if pylons.request.response_type == 'application/json':
             return self.table_filler.get_value(**kw)
 
-        if use_paginate:
+        if not getattr(self.table.__class__, '__retrieves_own_value__', False):
             values = self.table_filler.get_value(**kw)
         else:
             values = []
@@ -133,7 +134,7 @@ class CrudRestController(RestController):
         for i, pk in  enumerate(pks):
             kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
-        return dict(value=value)
+        return dict(value=value,model=self.model.__name__)
 
     @expose('tgext.crud.templates.edit')
     def edit(self, *args, **kw):
@@ -145,7 +146,7 @@ class CrudRestController(RestController):
             kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
         value['_method'] = 'PUT'
-        return dict(value=value, model=self.model.__name__)
+        return dict(value=value, model=self.model.__name__, pk_count=len(pks))
 
     @without_trailing_slash
     @expose('tgext.crud.templates.new')
@@ -172,7 +173,7 @@ class CrudRestController(RestController):
                 kw[pk] = args[i]
 
         self.provider.update(self.model, params=kw)
-        redirect('../')
+        redirect('../' * len(pks))
 
     @expose()
     def post_delete(self, *args, **kw):
@@ -182,7 +183,7 @@ class CrudRestController(RestController):
         for i, arg in enumerate(args):
             d[pks[i]] = arg
         self.provider.delete(self.model, d)
-        redirect('./')
+        redirect('./' + '../' * (len(pks) - 1))
 
     @expose('tgext.crud.templates.get_delete')
     def get_delete(self, *args, **kw):

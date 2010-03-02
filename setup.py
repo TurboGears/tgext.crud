@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.3.3'
+version = '0.3.7'
 
 here = os.path.abspath(os.path.dirname(__file__))
 try:
@@ -30,8 +30,8 @@ setup(name='tgext.crud',
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-          'sprox>=0.5.4.1',
-          'tw.forms>=0.9',
+          'sprox>=0.6.6',
+          'tw.forms>=0.9.8',
         #  'tw.dojo',
           # -*- Extra requirements: -*-
       ],

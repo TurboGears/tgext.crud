@@ -20,8 +20,8 @@
             <li py:for="lower, item in sorted(tmpl_context.menu_items.iteritems())"><a href="../${lower}s/">$item.__name__</a></li>
        </ul>
   </div>
-  <div style="float:left;">
-    <h1 style="margin-top:1px;">New $model</h1>
+  <div style="float:left;" class="crud_add">
+    <h2 style="margin-top:1px;">New $model</h2>
      ${XML(tmpl_context.widget(value=value, action='./'))}
   </div>
   <div style="height:0px; clear:both;"> &nbsp; </div>

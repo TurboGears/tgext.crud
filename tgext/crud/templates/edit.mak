@@ -12,7 +12,7 @@ ${tmpl_context.title} - ${model}
 </%def>
   <div id="main_content">
     ${menu_items.menu_items('../../')}
-  <div style="float:left;">
+  <div style="float:left;" class="crud_edit">
     <h2 style="margin-top:1px;">Edit ${model}</h2>
      ${tmpl_context.widget(value=value, action='./') | n}
   </div>
