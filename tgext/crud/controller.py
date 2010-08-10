@@ -119,7 +119,7 @@ class CrudRestController(RestController):
             values = self.table_filler.get_value(**kw)
         else:
             values = []
-            tmpl_context.paginators = None
+
         tmpl_context.widget = self.table
         return dict(model=self.model.__name__, value_list=values)
 
