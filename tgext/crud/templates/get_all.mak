@@ -14,7 +14,7 @@ ${parent.header()}
   <div style="float:left; width:80%">
     <h1 style="margin-top:1px;">${model} Listing</h1>
     <div style="margin:1ex 0; width:90%">
-      <a href='new/' class="add_link">New ${model}</a>
+      <a href='new' class="add_link">New ${model}</a>
          % if tmpl_context.paginators:
            <span style="margin-left:2em">${tmpl_context.paginators.value_list.pager(link='../%ss'%model.lower())}</span>
          % endif
