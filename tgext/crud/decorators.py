@@ -87,13 +87,17 @@ def catch_errors(error_types=None, error_handler=None):
                     message=None
             if message:
                 flash(message,status="status_alert")
-                func = error_handler
-                func.im_func = error_handler
-                func.im_self = self
-                func.im_controller = self
-                return func.im_controller._call(func, params=kwargs, remainder=[self, args])
+                # have to get the instance that matches the error handler.  This is not a great solution, but it's 
+                # what we've got for now.
+                if isinstance(error_handler, basestring):
+                    name = error_handler
+                else:
+                    name = error_handler.__name__
+                func = getattr(self, name)
+                remainder = []
+                remainder.extend(args)
+                return self._call(func, params=kwargs, remainder=remainder)
 
-#                return self._perform_call(None, dict(url=error_handler.__name__+'/'+'/'.join(args), params=kwargs))
         return value
     return decorator(wrapper)
 
