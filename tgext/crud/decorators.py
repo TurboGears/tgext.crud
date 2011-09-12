@@ -3,7 +3,6 @@
 from decorator import decorator
 from tg.decorators import validate as tgValidate
 from tg import flash
-import transaction
 
 class registered_validate(tgValidate):
     """
