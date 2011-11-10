@@ -1,6 +1,7 @@
 """
 """
-from tg import expose, flash, redirect, tmpl_context
+import tg
+from tg import expose, flash, redirect, tmpl_context, request
 from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 import pylons
@@ -83,6 +84,17 @@ class CrudRestController(RestController):
         tmpl_context.menu_items = self.menu_items
         tmpl_context.title = self.title
 
+    def _mount_point(self):
+        try:
+            mount_point = self.mount_point
+            if not mount_point:
+                #non statically mounted, we are probably used from tgext.admin which pluralizes things
+                mount_point = '%s/%ss' % (tg.dispatched_controller().mount_point, self.model.__name__.lower())
+        except:
+            #Old TurboGears, fallback to old url generation method
+            mount_point = '../%ss' % (self.model.__name__.lower())
+        return mount_point
+
     def __init__(self, session, menu_items=None):
         if menu_items is None:
             menu_items = {}
@@ -121,7 +133,8 @@ class CrudRestController(RestController):
             values = []
 
         tmpl_context.widget = self.table
-        return dict(model=self.model.__name__, value_list=values)
+        return dict(model=self.model.__name__, value_list=values,
+                    mount_point=self._mount_point())
 
     @expose('tgext.crud.templates.get_one')
     @expose('json')

@@ -16,11 +16,11 @@ ${parent.header()}
     <div style="margin:1ex 0; width:90%">
       <a href='new' class="add_link">New ${model}</a>
          % if tmpl_context.paginators:
-           <span style="margin-left:2em">${tmpl_context.paginators.value_list.pager(link='../%ss'%model.lower())}</span>
+           <span style="margin-left:2em">${tmpl_context.paginators.value_list.pager(link=mount_point+'/')}</span>
          % endif
     </div>
     <div class="crud_table" style="height:50%; width:90%">
-     ${tmpl_context.widget(value=value_list, action='../'+model.lower()+'s.json', attrs=dict(style="height:200px; border:solid black 3px;")) |n}
+     ${tmpl_context.widget(value=value_list, action=mount_point+'.json', attrs=dict(style="height:200px; border:solid black 3px;")) |n}
     </div>
   </div>
 </div>
