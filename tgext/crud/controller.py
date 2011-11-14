@@ -8,6 +8,10 @@ import pylons
 
 from decorators import registered_validate, register_validators, catch_errors
 from sprox.providerselector import ProviderTypeSelector
+from sprox.tablebase import TableBase
+from sprox.fillerbase import TableFiller
+from sprox.formbase import AddRecordForm, EditableForm
+from sprox.fillerbase import RecordFiller, AddFormFiller
 
 errors = ()
 try:
@@ -27,7 +31,6 @@ from tg.decorators import paginate
     #use_paginate = False
     #def paginate(*args, **kw):
     #    return lambda f: f
-
 
 class CrudRestController(RestController):
     """
@@ -203,3 +206,35 @@ class CrudRestController(RestController):
         """This is the code that creates a confirm_delete page"""
         return dict(args=args)
 
+class EasyCrudRestController(CrudRestController):
+    def __init__(self, session):
+        super(EasyCrudRestController, self).__init__(session)
+        if not hasattr(self, 'table'):
+            class Table(TableBase):
+                __entity__=self.model
+            self.table = Table(session)
+
+        if not hasattr(self, 'table_filler'):
+            class MyTableFiller(TableFiller):
+                __entity__ = self.model
+            self.table_filler = MyTableFiller(session)
+
+        if not hasattr(self, 'edit_form'):
+            class EditForm(EditableForm):
+                __entity__ = self.model
+            self.edit_form = EditForm(session)
+
+        if not hasattr(self, 'edit_filler'):
+            class EditFiller(RecordFiller):
+                __entity__ = self.model
+            self.edit_filler = EditFiller(session)
+
+        if not hasattr(self, 'new_form'):
+            class NewForm(AddRecordForm):
+                __entity__ = self.model
+            self.new_form = NewForm(session)
+
+        if not hasattr(self, 'new_filler'):
+            class NewFiller(AddFormFiller):
+                __entity__ = self.model
+            self.new_filler = NewFiller(session)
