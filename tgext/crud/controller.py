@@ -208,7 +208,6 @@ class CrudRestController(RestController):
 
 class EasyCrudRestController(CrudRestController):
     def __init__(self, session):
-        super(EasyCrudRestController, self).__init__(session)
         if not hasattr(self, 'table'):
             class Table(TableBase):
                 __entity__=self.model
@@ -238,3 +237,5 @@ class EasyCrudRestController(CrudRestController):
             class NewFiller(AddFormFiller):
                 __entity__ = self.model
             self.new_filler = NewFiller(session)
+        
+        super(EasyCrudRestController, self).__init__(session)
