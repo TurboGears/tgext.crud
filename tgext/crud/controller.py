@@ -4,9 +4,9 @@ import tg
 from tg import expose, flash, redirect, tmpl_context, request
 from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
-import pylons
 
 from decorators import registered_validate, register_validators, catch_errors
+from utils import create_setter
 from sprox.providerselector import ProviderTypeSelector
 from sprox.tablebase import TableBase
 from sprox.fillerbase import TableFiller
@@ -127,7 +127,7 @@ class CrudRestController(RestController):
            Pagination is done by offset/limit in the filler method.
            Returns an HTML page with the records if not json.
         """
-        if pylons.request.response_type == 'application/json':
+        if tg.request.response_type == 'application/json':
             return self.table_filler.get_value(**kw)
 
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
@@ -239,3 +239,15 @@ class EasyCrudRestController(CrudRestController):
             self.new_filler = NewFiller(session)
         
         super(EasyCrudRestController, self).__init__(session)
+
+        #Permit to quickly customize form options
+        if hasattr(self, '__form_options__'):
+            for name, value in self.__form_options__.iteritems():
+                for form in (self.edit_form, self.new_form):
+                    if form:
+                        setattr(form, name, value)
+
+        #Permit to quickly create custom actions to set values
+        if hasattr(self, '__setters__'):
+            for name, config in self.__setters__.iteritems():
+                setattr(self, name, create_setter(self, self.get_all, config))
