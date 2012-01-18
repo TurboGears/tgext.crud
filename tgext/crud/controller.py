@@ -25,6 +25,8 @@ try:
 except ImportError:
     use_paginate = True
 
+import urlparse, cgi
+
 from tg.decorators import paginate
 #else:
     # if dojo ist installed, we don't need pagination
@@ -77,15 +79,18 @@ class CrudRestController(RestController):
     """
 
     title = "Turbogears Admin System"
+    keep_params = None
 
     def _before(self, *args, **kw):
         tmpl_context.title = self.title
         tmpl_context.menu_items = self.menu_items
+        tmpl_context.kept_params = self._kept_params()
 
     def __before__(self, *args, **kw):
         # this will be removed in 2.1.*
         tmpl_context.menu_items = self.menu_items
         tmpl_context.title = self.title
+        tmpl_context.kept_params = self._kept_params()
 
     def _mount_point(self):
         try:
@@ -98,12 +103,29 @@ class CrudRestController(RestController):
             mount_point = '../%ss' % (self.model.__name__.lower())
         return mount_point
 
+    def _kept_params(self):
+        if not self.keep_params:
+            return {}
+
+        if not request.referer:
+            from_referer = {}
+        else:
+            parsed = urlparse.urlparse(request.referer)
+            from_referer = dict(cgi.parse_qsl(parsed.query))
+        from_referer.update(request.params)
+
+        pass_params = {}
+        for k in self.keep_params:
+            if k in from_referer:
+                pass_params[k] = from_referer[k]
+        return pass_params
+
     def __init__(self, session, menu_items=None):
         if menu_items is None:
             menu_items = {}
         self.menu_items = menu_items
         self.provider = ProviderTypeSelector().get_selector(self.model).get_provider(self.model, hint=session)
-
+        
         self.session = session
 
         #this makes crc declarative
@@ -176,7 +198,7 @@ class CrudRestController(RestController):
     @registered_validate(error_handler=new)
     def post(self, *args, **kw):
         self.provider.create(self.model, params=kw)
-        raise redirect('./')
+        raise redirect('./', params=self._kept_params())
 
     @expose()
     @registered_validate(error_handler=edit)
@@ -189,7 +211,7 @@ class CrudRestController(RestController):
                 kw[pk] = args[i]
 
         self.provider.update(self.model, params=kw)
-        redirect('../' * len(pks))
+        redirect('../' * len(pks), params=self._kept_params())
 
     @expose()
     def post_delete(self, *args, **kw):
@@ -199,7 +221,7 @@ class CrudRestController(RestController):
         for i, arg in enumerate(args):
             d[pks[i]] = arg
         self.provider.delete(self.model, d)
-        redirect('./' + '../' * (len(pks) - 1))
+        redirect('./' + '../' * (len(pks) - 1), params=self._kept_params())
 
     @expose('tgext.crud.templates.get_delete')
     def get_delete(self, *args, **kw):
