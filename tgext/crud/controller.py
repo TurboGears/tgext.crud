@@ -6,7 +6,7 @@ from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 
 from decorators import registered_validate, register_validators, catch_errors
-from utils import create_setter
+from utils import create_setter, set_table_filler_getter
 from sprox.providerselector import ProviderTypeSelector
 from sprox.tablebase import TableBase
 from sprox.fillerbase import TableFiller
@@ -273,3 +273,15 @@ class EasyCrudRestController(CrudRestController):
         if hasattr(self, '__setters__'):
             for name, config in self.__setters__.iteritems():
                 setattr(self, name, create_setter(self, self.get_all, config))
+
+
+        #Permit to quickly customize table options
+        if hasattr(self, '__table_options__'):
+            for name, value in self.__table_options__.iteritems():
+                if name.startswith('__'):
+                    for table_object in (self.table_filler, self.table):
+                        if table_object:
+                            setattr(table_object, name, value)
+                else:
+                    if self.table_filler:
+                        set_table_filler_getter(self.table_filler, name, value)
