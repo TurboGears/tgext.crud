@@ -210,7 +210,11 @@ class CrudRestController(RestController):
             if pk not in kw and i < len(args):
                 kw[pk] = args[i]
 
-        self.provider.update(self.model, params=kw)
+        omit_fields = []
+        if getattr(self, 'edit_form', None):
+            omit_fields = self.edit_form.__omit_fields__
+
+        self.provider.update(self.model, params=kw, omit_fields=omit_fields)
         redirect('../' * len(pks), params=self._kept_params())
 
     @expose()
