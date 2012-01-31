@@ -1,0 +1,19 @@
+0.4 (Jan. 31, 2012)
+-----------------------
+ * Support filtering results in table view when passing arguments to the url
+ * Added keep_params option which makes possible to keep around
+filters, useful when you want to administer only a subset of the
+available objects.
+
+0.3 (Sept. 30, 2009)
+----------------------
+
+* Mako template support
+* Title template fixes
+* Provider session bug fixed 
+* TW 0.9.7.2 support
+* Pagination added.
+
+0.2.x
+------
+Prehistory (should have kept better logs)
