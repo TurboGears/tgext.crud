@@ -16,7 +16,9 @@
   <div id="main_content">
     <div style="float:left; padding-left:0px;">
         <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
-            <li py:for="lower, item in sorted(tmpl_context.menu_items.iteritems())"><a href="../${lower}s">$item.__name__</a></li>
+            <li py:for="lower, item in sorted(tmpl_context.menu_items.iteritems())">
+                <a href="${tmpl_context.crud_helpers.make_link(lower)}">$item</a>
+            </li>
         </ul>
     </div>
     <div style="float:left; width:80%">

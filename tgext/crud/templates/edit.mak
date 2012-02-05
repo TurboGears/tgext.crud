@@ -11,7 +11,7 @@ ${tmpl_context.title} - ${model}
   ${parent.header()}
 </%def>
   <div id="main_content">
-    ${menu_items.menu_items('../../')}
+    ${menu_items.menu_items(pk_count)}
   <div style="float:left;" class="crud_edit">
     <h2 style="margin-top:1px;">Edit ${model}</h2>
      ${tmpl_context.widget(value=value, action='./') | n}

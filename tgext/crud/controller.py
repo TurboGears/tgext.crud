@@ -25,7 +25,7 @@ try:
 except ImportError:
     use_paginate = True
 
-import urlparse, cgi
+import urlparse, cgi, inspect
 
 from tg.decorators import paginate
 #else:
@@ -33,6 +33,12 @@ from tg.decorators import paginate
     #use_paginate = False
     #def paginate(*args, **kw):
     #    return lambda f: f
+
+class CrudRestControllerHelpers(object):
+    def make_link(self, where, pk_count=0):
+        if not where.startswith('/'):
+            where = '../' * (1 + pk_count) + where
+        return where
 
 class CrudRestController(RestController):
     """
@@ -85,12 +91,14 @@ class CrudRestController(RestController):
         tmpl_context.title = self.title
         tmpl_context.menu_items = self.menu_items
         tmpl_context.kept_params = self._kept_params()
+        tmpl_context.crud_helpers = self.helpers
 
     def __before__(self, *args, **kw):
         # this will be removed in 2.1.*
         tmpl_context.menu_items = self.menu_items
         tmpl_context.title = self.title
         tmpl_context.kept_params = self._kept_params()
+        tmpl_context.crud_helpers = self.helpers
 
     def _mount_point(self):
         try:
@@ -120,10 +128,21 @@ class CrudRestController(RestController):
                 pass_params[k] = from_referer[k]
         return pass_params
 
+    def _adapt_menu_items(self, menu_items):
+        adapted_menu_items = {}
+
+        for link, model in menu_items.iteritems():
+            if inspect.isclass(model):
+                adapted_menu_items[link + 's'] = model.__name__
+            else:
+                adapted_menu_items[link] = model
+        return adapted_menu_items
+
     def __init__(self, session, menu_items=None):
         if menu_items is None:
             menu_items = {}
-        self.menu_items = menu_items
+        self.menu_items = self._adapt_menu_items(menu_items)
+        self.helpers = CrudRestControllerHelpers()
         self.provider = ProviderTypeSelector().get_selector(self.model).get_provider(self.model, hint=session)
         
         self.session = session
