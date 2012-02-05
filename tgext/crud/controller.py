@@ -233,7 +233,7 @@ class CrudRestController(RestController):
         return dict(args=args)
 
 class EasyCrudRestController(CrudRestController):
-    def __init__(self, session):
+    def __init__(self, session, menu_items=None):
         if not hasattr(self, 'table'):
             class Table(TableBase):
                 __entity__=self.model
@@ -264,7 +264,7 @@ class EasyCrudRestController(CrudRestController):
                 __entity__ = self.model
             self.new_filler = NewFiller(session)
         
-        super(EasyCrudRestController, self).__init__(session)
+        super(EasyCrudRestController, self).__init__(session, menu_items)
 
         #Permit to quickly customize form options
         if hasattr(self, '__form_options__'):
