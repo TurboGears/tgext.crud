@@ -6,9 +6,8 @@ from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 
 from decorators import registered_validate, register_validators, catch_errors
-from utils import create_setter, set_table_filler_getter
+from utils import create_setter, set_table_filler_getter, SortableTableBase
 from sprox.providerselector import ProviderTypeSelector
-from sprox.tablebase import TableBase
 from sprox.fillerbase import TableFiller
 from sprox.formbase import AddRecordForm, EditableForm
 from sprox.fillerbase import RecordFiller, AddFormFiller
@@ -254,7 +253,7 @@ class CrudRestController(RestController):
 class EasyCrudRestController(CrudRestController):
     def __init__(self, session, menu_items=None):
         if not hasattr(self, 'table'):
-            class Table(TableBase):
+            class Table(SortableTableBase):
                 __entity__=self.model
             self.table = Table(session)
 
