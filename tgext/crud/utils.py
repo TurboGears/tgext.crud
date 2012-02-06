@@ -3,6 +3,7 @@ from validators import EntityValidator
 from sprox.tablebase import TableBase
 from tw.forms.datagrid import Column
 from webhelpers.html.tags import link_to
+from webhelpers.html import literal
 import new
 
 def create_setter(crud_controller, err_handler, config):
@@ -48,6 +49,12 @@ class SortableColumn(Column):
 
     title = property(get_title, set_title)
 
+    def get_field(self, row, displays_on=None):
+        res = super(SortableColumn, self).get_field(row, displays_on)
+        if self.options['xml']:
+            res = literal(res)
+        return res
+
 class SortableTableBase(TableBase):
     def _do_get_widget_args(self):
         args = super(SortableTableBase, self)._do_get_widget_args()
@@ -59,7 +66,8 @@ class SortableTableBase(TableBase):
                 field = SortableColumn(field[0],
                                        getter=field[1],
                                        title=field[0],
-                                       options={'sort_field':field[0]})
+                                       options={'sort_field':field[0],
+                                                'xml':field[0] in args['xml_fields']})
             adapted_fields.append(field)
 
         args['fields'] = adapted_fields
