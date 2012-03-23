@@ -19,19 +19,8 @@ try:
 except ImportError:
     pass
 
-try:
-    import tw.dojo
-except ImportError:
-    use_paginate = True
-
 import urlparse, cgi, inspect
-
 from tg.decorators import paginate
-#else:
-    # if dojo ist installed, we don't need pagination
-    #use_paginate = False
-    #def paginate(*args, **kw):
-    #    return lambda f: f
 
 class CrudRestControllerHelpers(object):
     def make_link(self, where, pk_count=0):

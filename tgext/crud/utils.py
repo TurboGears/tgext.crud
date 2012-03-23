@@ -1,10 +1,14 @@
 from tg import expose, validate, redirect, request, url
 from validators import EntityValidator
 from sprox.tablebase import TableBase
-from tw.forms.datagrid import Column
 from webhelpers.html.tags import link_to
 from webhelpers.html import literal
 import new
+
+try:
+    from tw2.forms.datagrid import Column
+except ImportError:
+    from tw.forms.datagrid import Column
 
 def create_setter(crud_controller, err_handler, config):
     provider = crud_controller.provider
