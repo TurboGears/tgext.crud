@@ -12,9 +12,11 @@ ${tmpl_context.title} - ${model}
 </%def>
   <div id="main_content">
     ${menu_items.menu_items(pk_count)}
-  <div style="float:left;" class="crud_edit">
-    <h2 style="margin-top:1px;">Edit ${model}</h2>
-     ${tmpl_context.widget(value=value, action='./') | n}
-  </div>
+    <div id="crud_content">
+      <div class="crud_edit">
+        <h2>Edit ${model}</h2>
+         ${tmpl_context.widget(value=value, action='./') | n}
+      </div>
+    </div>
   <div style="height:0px; clear:both;"> &nbsp; </div>
   </div> <!-- end main_content -->

@@ -3,29 +3,26 @@
       xmlns:xi="http://www.w3.org/2001/XInclude">
 
 <xi:include href="master.html" />
-<title>${tmpl_context.title} - Edit ${model}</title>
 <head>
-<style>
-#menu_items {
-  padding:0px 12px 0px 2px;
-  list-style-type:None
-  }
-</style>
+    <title>${tmpl_context.title} - Edit ${model}</title>
+    <style>
+        ${Markup(tmpl_context.crud_style)}
+    </style>
 </head>
 <body class="tundra">
-  <div style="height:0px;"> &nbsp; </div>
-  <div style="float:left; padding-left:0px;">
+  <div id="crud_leftbar">
         <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
             <li py:for="lower, item in sorted(tmpl_context.menu_items.iteritems())">
               <a href="${tmpl_context.crud_helpers.make_link(lower, value_of('pk_count', 1))}">$item</a>
             </li>
        </ul>
   </div>
-  <div style="float:left;" class="crud_edit">
-    <h2 style="margin-top:1px;">Edit $model</h2>
-     ${XML(tmpl_context.widget(value=value, action='./'))}
+  <div id="crud_content">
+      <div class="crud_edit">
+        <h2>Edit $model</h2>
+         ${XML(tmpl_context.widget(value=value, action='./'))}
+      </div>
   </div>
-  <div style="height:0px; clear:both;"> &nbsp; </div>
-
+  <div style="clear:both;"/>
 </body>
 </html>

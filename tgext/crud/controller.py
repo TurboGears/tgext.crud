@@ -1,5 +1,6 @@
 """
 """
+import os
 import tg
 from tg import expose, flash, redirect, tmpl_context, request
 from tg.decorators import without_trailing_slash, with_trailing_slash
@@ -74,19 +75,52 @@ class CrudRestController(RestController):
 
     title = "Turbogears Admin System"
     keep_params = None
+    style = '''
+#menu_items {
+  padding:0px 12px 0px 2px;
+  list-style-type:None;
+  padding-left:0px;
+}
+
+#crud_leftbar {
+    float:left;
+    padding-left:0px;
+}
+
+#crud_content {
+    float:left;
+    width:80%;
+}
+
+#crud_content > h1,
+.crud_edit > h2,
+.crud_add > h2 {
+    margin-top: 1px;
+}
+
+#crud_btn_new {
+    margin:1ex 0;
+}
+
+#crud_btn_new > span {
+    margin-left:2em;
+}
+'''
 
     def _before(self, *args, **kw):
         tmpl_context.title = self.title
         tmpl_context.menu_items = self.menu_items
         tmpl_context.kept_params = self._kept_params()
         tmpl_context.crud_helpers = self.helpers
+        tmpl_context.crud_style = self.style
 
     def __before__(self, *args, **kw):
-        # this will be removed in 2.1.*
+        # this will be removed in 2.2.*
         tmpl_context.menu_items = self.menu_items
         tmpl_context.title = self.title
         tmpl_context.kept_params = self._kept_params()
         tmpl_context.crud_helpers = self.helpers
+        tmpl_context.crud_style = self.style
 
     def _mount_point(self):
         try:

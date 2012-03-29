@@ -1,15 +1,11 @@
 <%def name="menu_style()">
 <style>
-#menu_items {
-  padding:0px 12px 0px 2px;
-  list-style-type:None;
-  float:left; 
-  padding-left:0px;
-  }
+    ${tmpl_context.crud_style}
 </style>
 </%def>
 
 <%def name="menu_items(pk_count=0)">
+  <div id="crud_leftbar">
     <div id="menu_items">
         <ul>
         % if hasattr(tmpl_context, 'menu_items'):
@@ -21,4 +17,5 @@
         % endif
         </ul>
     </div>
+  </div>
 </%def>

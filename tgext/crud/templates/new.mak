@@ -13,8 +13,11 @@ ${tmpl_context.title} - New ${model}
 
 <div id="main_content">
   ${menu_items.menu_items()}
-<div style="float:left;" class="crud_add">
-  <h2 style="margin:5px 0px; 4px; 0px;">New ${model}</h2>
-   ${tmpl_context.widget(value=value, action='./') | n}
+  <div id="crud_content">
+    <div class="crud_add">
+      <h2>New ${model}</h2>
+       ${tmpl_context.widget(value=value, action='./') | n}
+    </div>
+  </div>
+  <div style="clear:both;"> &nbsp; </div>
 </div>
-<div style="height:0px; clear:both;"> &nbsp; </div>

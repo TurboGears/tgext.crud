@@ -3,36 +3,29 @@
       xmlns:xi="http://www.w3.org/2001/XInclude">
   <xi:include href="master.html" />
 <head>
-<title>${tmpl_context.title} - ${model} Listing</title>
-<style>
-#menu_items {
-  padding:0px 12px 0px 2px;
-  list-style-type:None
-  }
-</style>
+    <title>${tmpl_context.title} - ${model} Listing</title>
+    <style>
+        ${Markup(tmpl_context.crud_style)}
+    </style>
 </head>
 <body class="tundra">
-  <div style="height:0px;"> &nbsp; </div>
-  <div id="main_content">
-    <div style="float:left; padding-left:0px;">
+    <div id="crud_leftbar">
         <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
             <li py:for="lower, item in sorted(tmpl_context.menu_items.iteritems())">
                 <a href="${tmpl_context.crud_helpers.make_link(lower)}">$item</a>
             </li>
         </ul>
     </div>
-    <div style="float:left; width:80%">
-      <h1 style="margin-top:1px;">$model Listing</h1>
-      <div style="margin:1ex 0; width:90%">
+    <div id="crud_content">
+      <h1>$model Listing</h1>
+      <div id="crud_btn_new">
         <a href='${tg.url("new", params=tmpl_context.kept_params)}' class="add_link">New $model</a>
-        <span py:if="value_list" style="margin-left:2em" py:content="tmpl_context.paginators.value_list.pager(link=mount_point+'/')"/>
+        <span py:if="value_list" py:content="tmpl_context.paginators.value_list.pager(link=mount_point+'/')"/>
       </div>
-      <div class="crud_table" style="height:50%; width:90%">
+      <div class="crud_table">
         ${XML(tmpl_context.widget.display(value=value_list, action=mount_point+'.json'))}
       </div>
     </div>
-  </div>
-  <div style="clear:both;"/>
-
+    <div style="clear:both;"/>
 </body>
 </html>
