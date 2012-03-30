@@ -1,17 +1,18 @@
 """
 """
-import os
 import tg
 from tg import expose, flash, redirect, tmpl_context, request
 from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 
 from decorators import registered_validate, register_validators, catch_errors
+from tgext.crud.utils import get_table_headers
 from utils import create_setter, set_table_filler_getter, SortableTableBase
 from sprox.providerselector import ProviderTypeSelector
 from sprox.fillerbase import TableFiller
 from sprox.formbase import AddRecordForm, EditableForm
 from sprox.fillerbase import RecordFiller, AddFormFiller
+from webhelpers.html import literal
 
 errors = ()
 try:
@@ -75,7 +76,7 @@ class CrudRestController(RestController):
 
     title = "Turbogears Admin System"
     keep_params = None
-    style = '''
+    style = literal('''
 #menu_items {
   padding:0px 12px 0px 2px;
   list-style-type:None;
@@ -105,7 +106,20 @@ class CrudRestController(RestController):
 #crud_btn_new > span {
     margin-left:2em;
 }
-'''
+
+#crud_search {
+    float: right;
+}
+
+#crud_search input {
+    border: 1px solid #CCC;
+    background-color: white;
+}
+
+#crud_search input:hover {
+    background-color: #EFEFEF;
+}
+''')
 
     def _before(self, *args, **kw):
         tmpl_context.title = self.title
@@ -199,8 +213,10 @@ class CrudRestController(RestController):
             values = []
 
         tmpl_context.widget = self.table
+        headers = get_table_headers(self.table)
         return dict(model=self.model.__name__, value_list=values,
-                    mount_point=self._mount_point())
+                    mount_point=self._mount_point(),
+                    headers=headers)
 
     @expose('tgext.crud.templates.get_one')
     @expose('json')

@@ -27,6 +27,11 @@ def set_table_filler_getter(filler, name, function):
     meth = new.instancemethod(function, filler, filler.__class__)
     setattr(filler, name, meth)
 
+def get_table_headers(table):
+    return [(field, table.__headers__.get(field, field))
+            for field in table.__fields__
+            if field != '__actions__']
+
 class SortableColumn(Column):
     def __init__(self, name, *args, **kw):
         super(SortableColumn, self).__init__(name, *args, **kw)
