@@ -31,7 +31,6 @@ setup(name='tgext.crud',
       zip_safe=True,
       install_requires=[
           'sprox>0.7',
-          'tw2.forms',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
