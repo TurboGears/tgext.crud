@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.4'
+version = '0.5'
 
 here = os.path.abspath(os.path.dirname(__file__))
 try:
@@ -20,7 +20,7 @@ setup(name='tgext.crud',
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
-      keywords='TG, TG2, REST, sprox',
+      keywords='turbogears2.extension, TG2, REST, sprox',
       author='Christopher Perkins',
       author_email='chris@percious.com',
       url='',
