@@ -196,7 +196,8 @@ class CrudRestController(RestController):
             register_validators(self, 'put', self.edit_form)
 
     @with_trailing_slash
-    @expose('tgext.crud.templates.get_all')
+    @expose('genshi:tgext.crud.templates.get_all')
+    @expose('mako:tgext.crud.templates.get_all')
     @expose('json')
     @paginate('value_list', items_per_page=7)
     def get_all(self, *args, **kw):
@@ -218,7 +219,8 @@ class CrudRestController(RestController):
                     mount_point=self._mount_point(),
                     headers=headers)
 
-    @expose('tgext.crud.templates.get_one')
+    @expose('genshi:tgext.crud.templates.get_one')
+    @expose('mako:tgext.crud.templates.get_one')
     @expose('json')
     def get_one(self, *args, **kw):
         """get one record, returns HTML or json"""
@@ -231,7 +233,8 @@ class CrudRestController(RestController):
         value = self.edit_filler.get_value(kw)
         return dict(value=value,model=self.model.__name__)
 
-    @expose('tgext.crud.templates.edit')
+    @expose('genshi:tgext.crud.templates.edit')
+    @expose('mako:tgext.crud.templates.edit')
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
         tmpl_context.widget = self.edit_form
@@ -244,7 +247,8 @@ class CrudRestController(RestController):
         return dict(value=value, model=self.model.__name__, pk_count=len(pks))
 
     @without_trailing_slash
-    @expose('tgext.crud.templates.new')
+    @expose('genshi:tgext.crud.templates.new')
+    @expose('mako:tgext.crud.templates.new')
     def new(self, *args, **kw):
         """Display a page to show a new record."""
         tmpl_context.widget = self.new_form
@@ -284,7 +288,7 @@ class CrudRestController(RestController):
         self.provider.delete(self.model, d)
         redirect('./' + '../' * (len(pks) - 1), params=self._kept_params())
 
-    @expose('tgext.crud.templates.get_delete')
+    @expose('genshi:tgext.crud.templates.get_delete')
     def get_delete(self, *args, **kw):
         """This is the code that creates a confirm_delete page"""
         return dict(args=args)
