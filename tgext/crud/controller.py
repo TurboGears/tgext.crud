@@ -139,12 +139,13 @@ class CrudRestController(RestController):
     def _mount_point(self):
         try:
             mount_point = self.mount_point
-            if not mount_point:
-                #non statically mounted, we are probably used from tgext.admin which pluralizes things
-                mount_point = '%s/%ss' % (tg.dispatched_controller().mount_point, self.model.__name__.lower())
         except:
-            #Old TurboGears, fallback to old url generation method
-            mount_point = '../%ss' % (self.model.__name__.lower())
+            mount_point = None
+
+        if not mount_point:
+            #non statically mounted or Old TurboGears, use relative URL
+            mount_point = '.'
+
         return mount_point
 
     def _kept_params(self):
