@@ -344,7 +344,7 @@ class EasyCrudRestController(CrudRestController):
         #Permit to quickly customize table options
         if hasattr(self, '__table_options__'):
             for name, value in self.__table_options__.iteritems():
-                if name.startswith('__'):
+                if name.startswith('__') and name != '__actions__':
                     for table_object in (self.table_filler, self.table):
                         if table_object:
                             setattr(table_object, name, value)
