@@ -6,8 +6,19 @@ from webhelpers.html import literal
 import new
 
 try:
-    from tw2.forms.datagrid import Column
+    from tw2.core import Widget as Tw2Widget
 except ImportError:
+    class Tw2Widget(object):
+        pass
+
+from sprox.widgets import Widget as SproxWidget
+
+def sprox_with_tw2():
+    return SproxWidget is Tw2Widget
+
+if sprox_with_tw2():
+    from tw2.forms.datagrid import Column
+else:
     from tw.forms.datagrid import Column
 
 def create_setter(crud_controller, err_handler, config):
