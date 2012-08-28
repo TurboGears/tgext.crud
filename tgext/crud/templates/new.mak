@@ -4,9 +4,9 @@
 <%def name="title()">
 ${tmpl_context.title} - New ${model}
 </%def>
-<%def name="header()">
+<%def name="meta()">
   ${menu_items.menu_style()}
-  ${parent.header()}
+  ${parent.meta()}
 </%def>
 
 <%def name="body_class()">tundra</%def>

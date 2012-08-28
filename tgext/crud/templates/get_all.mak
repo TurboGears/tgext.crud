@@ -4,7 +4,7 @@
 <%def name="title()">
 ${tmpl_context.title} - ${model} Listing
 </%def>
-<%def name="header()">
+<%def name="meta()">
 ${menu_items.menu_style()}
 <script>
     function crud_search_field_changed(select) {
@@ -17,7 +17,7 @@ ${menu_items.menu_style()}
         field.name = selected.value;
     }
 </script>
-${parent.header()}
+${parent.meta()}
 </%def>
 <%def name="body_class()">tundra</%def>
 <div id="main_content">

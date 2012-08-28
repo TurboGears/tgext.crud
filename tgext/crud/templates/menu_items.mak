@@ -6,8 +6,7 @@
 
 <%def name="menu_items(pk_count=0)">
   <div id="crud_leftbar">
-    <div id="menu_items">
-        <ul>
+        <ul id="menu_items">
         % if hasattr(tmpl_context, 'menu_items'):
            % for lower, item in sorted(tmpl_context.menu_items.iteritems()):
             <li>
@@ -16,6 +15,5 @@
            % endfor
         % endif
         </ul>
-    </div>
   </div>
 </%def>

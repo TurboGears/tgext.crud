@@ -6,9 +6,9 @@ ${tmpl_context.title} - ${model}
 </%def>
 
 <%def name="body_class()">tundra</%def>
-<%def name="header()">
+<%def name="meta()">
   ${menu_items.menu_style()}
-  ${parent.header()}
+  ${parent.meta()}
 </%def>
   <div id="main_content">
     ${menu_items.menu_items(pk_count)}
