@@ -6,7 +6,7 @@ from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 
 from decorators import registered_validate, register_validators, catch_errors
-from tgext.crud.utils import get_table_headers
+from tgext.crud.utils import get_table_headers, SmartPaginationCollection, RequestLocalTableFiller
 from utils import create_setter, set_table_filler_getter, SortableTableBase
 from sprox.providerselector import ProviderTypeSelector
 from sprox.fillerbase import TableFiller
@@ -211,7 +211,18 @@ class CrudRestController(RestController):
             return self.table_filler.get_value(**kw)
 
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
-            values = self.table_filler.get_value(**kw)
+            kw.pop('limit', None)
+            kw.pop('offset', None)
+
+            if isinstance(self.table_filler, RequestLocalTableFiller):
+                paginator = request.paginators['value_list']
+                page = paginator.paginate_page - 1
+                values = self.table_filler.get_value(offset=page*paginator.paginate_items_per_page,
+                                                     limit=paginator.paginate_items_per_page,
+                                                     **kw)
+                values = SmartPaginationCollection(values, self.table_filler.__count__)
+            else:
+                values = self.table_filler.get_value(**kw)
         else:
             values = []
 
@@ -308,7 +319,7 @@ class EasyCrudRestController(CrudRestController):
             self.table = Table(session)
 
         if not hasattr(self, 'table_filler'):
-            class MyTableFiller(TableFiller):
+            class MyTableFiller(RequestLocalTableFiller):
                 __entity__ = self.model
             self.table_filler = MyTableFiller(session)
 

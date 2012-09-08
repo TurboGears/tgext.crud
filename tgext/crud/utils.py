@@ -1,6 +1,7 @@
 from tg import expose, validate, redirect, request, url
 from validators import EntityValidator
 from sprox.tablebase import TableBase
+from sprox.fillerbase import TableFiller
 from webhelpers.html.tags import link_to
 from webhelpers.html import literal
 import new
@@ -92,3 +93,40 @@ class SortableTableBase(TableBase):
 
         args['fields'] = adapted_fields
         return args
+
+class SmartPaginationCollection():
+    def __init__(self, data, total):
+        self.data = data
+        self.total = total
+
+    def __getitem__(self, item):
+        if not isinstance(item, slice):
+            raise TypeError('SmartPaginationCollection can only be sliced, not indexed')
+        return self.data
+
+    def __len__(self):
+        return self.total
+
+    def __iter__(self):
+        return self
+
+class RequestLocalTableFiller(TableFiller):
+    """Work-around for the fact that sprox stores count of retrieved
+       entities inside the table_filler itself leading to a race condition"""
+
+    def __init__(self, *args, **kw):
+        super(RequestLocalTableFiller, self).__init__(*args, **kw)
+        self._id = id(self)
+        print self._id
+
+    def set_request_local_count(self, value):
+        if not hasattr(request, '_tgext_crud_reqlocal_tfiller_count'):
+            request._tgext_crud_reqlocal_tfiller_count = {}
+        request._tgext_crud_reqlocal_tfiller_count.setdefault(self._id, value)
+
+    def get_request_local_count(self):
+        return request._tgext_crud_reqlocal_tfiller_count.get(self._id, 0)
+
+    __count__ = property(get_request_local_count, set_request_local_count)
+
+
