@@ -117,7 +117,6 @@ class RequestLocalTableFiller(TableFiller):
     def __init__(self, *args, **kw):
         super(RequestLocalTableFiller, self).__init__(*args, **kw)
         self._id = id(self)
-        print self._id
 
     def set_request_local_count(self, value):
         if not hasattr(request, '_tgext_crud_reqlocal_tfiller_count'):
