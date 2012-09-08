@@ -76,6 +76,7 @@ class CrudRestController(RestController):
 
     title = "Turbogears Admin System"
     keep_params = None
+    remember_values = []
     style = literal('''
 #menu_items {
   padding:0px 12px 0px 2px;
@@ -274,7 +275,12 @@ class CrudRestController(RestController):
 
         omit_fields = []
         if getattr(self, 'edit_form', None):
-            omit_fields = self.edit_form.__omit_fields__
+            omit_fields.extend(self.edit_form.__omit_fields__)
+
+        for remembered_value in self.remember_values:
+            value = kw.get(remembered_value)
+            if value is None or value == '':
+                omit_fields.append(remembered_value)
 
         self.provider.update(self.model, params=kw, omit_fields=omit_fields)
         redirect('../' * len(pks), params=self._kept_params())
