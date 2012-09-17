@@ -200,6 +200,7 @@ class CrudRestController(RestController):
     @with_trailing_slash
     @expose('genshi:tgext.crud.templates.get_all')
     @expose('mako:tgext.crud.templates.get_all')
+    @expose('jinja:tgext.crud.templates.get_all')
     @expose('json')
     @paginate('value_list', items_per_page=7)
     def get_all(self, *args, **kw):
@@ -234,6 +235,7 @@ class CrudRestController(RestController):
 
     @expose('genshi:tgext.crud.templates.get_one')
     @expose('mako:tgext.crud.templates.get_one')
+    @expose('jinja:tgext.crud.templates.get_one')
     @expose('json')
     def get_one(self, *args, **kw):
         """get one record, returns HTML or json"""
@@ -248,6 +250,7 @@ class CrudRestController(RestController):
 
     @expose('genshi:tgext.crud.templates.edit')
     @expose('mako:tgext.crud.templates.edit')
+    @expose('jinja:tgext.crud.templates.edit')
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
         tmpl_context.widget = self.edit_form
@@ -262,6 +265,7 @@ class CrudRestController(RestController):
     @without_trailing_slash
     @expose('genshi:tgext.crud.templates.new')
     @expose('mako:tgext.crud.templates.new')
+    @expose('jinja:tgext.crud.templates.new')
     def new(self, *args, **kw):
         """Display a page to show a new record."""
         tmpl_context.widget = self.new_form
@@ -307,6 +311,7 @@ class CrudRestController(RestController):
         redirect('./' + '../' * (len(pks) - 1), params=self._kept_params())
 
     @expose('genshi:tgext.crud.templates.get_delete')
+    @expose('jinja:tgext.crud.templates.get_delete')
     def get_delete(self, *args, **kw):
         """This is the code that creates a confirm_delete page"""
         return dict(args=args)
