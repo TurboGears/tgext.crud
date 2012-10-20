@@ -80,15 +80,23 @@ class SortableTableBase(TableBase):
     def _do_get_widget_args(self):
         args = super(SortableTableBase, self)._do_get_widget_args()
 
-        adapted_fields = []
         entity_fields = self.__provider__.get_fields(self.__entity__)
+        adapted_fields = []
         for field in args['fields']:
-            if field[0] in entity_fields and not self.__provider__.is_relation(self.__entity__, field[0]):
-                field = SortableColumn(field[0],
-                                       getter=field[1],
-                                       title=field[0],
-                                       options={'sort_field':field[0],
-                                                'xml':field[0] in args['xml_fields']})
+            if isinstance(field, Column):
+                options = {'sort_field':field.name, 'xml':field.name in args['xml_fields']}
+                options.update(field.options)
+                field_info = {'name':field.name, 'getter':field.getter, 'title':field.title, 'options':options}
+            else:
+                options = {'sort_field':field[0], 'xml':field[0] in args['xml_fields']}
+                field_info = {'name':field[0], 'getter':field[1], 'title':field[0], 'options':options}
+
+            if field_info['name'] in entity_fields and not self.__provider__.is_relation(self.__entity__, field_info['name']):
+                field = SortableColumn(field_info['name'],
+                                       getter=field_info['getter'],
+                                       title=field_info['title'],
+                                       options=field_info['options'])
+
             adapted_fields.append(field)
 
         args['fields'] = adapted_fields
