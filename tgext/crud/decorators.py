@@ -3,6 +3,7 @@
 from decorator import decorator
 from tg.decorators import validate as tgValidate
 from tg import flash
+import transaction
 
 class registered_validate(tgValidate):
     """
@@ -52,6 +53,12 @@ def register_validators(controller, name, validators):
         controller.__validators__ = {}
     controller.__validators__[name] = validators
 
+try:
+    from sqlalchemy.exc import IntegrityError, DatabaseError, ProgrammingError
+    sqla_errors =  (IntegrityError, DatabaseError, ProgrammingError)
+except ImportError:
+    sqla_errors = ()
+
 def catch_errors(error_types=None, error_handler=None):
     """
     A validator which catches the Exceptions in the error_types.
@@ -95,6 +102,12 @@ def catch_errors(error_types=None, error_handler=None):
                 func = getattr(self, name)
                 remainder = []
                 remainder.extend(args)
+
+                if isinstance(e, sqla_errors):
+                    #if the error is a sqlalchemy error suppose we need to rollback the transaction
+                    #so that the error handler can perform queries.
+                    transaction.abort()
+
                 return self._call(func, params=kwargs, remainder=remainder)
 
         return value
