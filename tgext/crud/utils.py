@@ -105,7 +105,14 @@ class SortableTableBase(TableBase):
 class SmartPaginationCollection():
     def __init__(self, data, total):
         self.data = data
-        self.total = total
+
+        # NOTE: This workaround is not needed nor supported in python3
+        # Verify that the total count is an int, because __len__ protocol
+        # only accepts ints in Python2, when using tgext.admin with psycopg2
+        # backend, total is passed as a long.
+        self.total = int(total)
+        if isinstance(self.total, long):
+            raise OverflowError("Exceeded length pagination limit")
 
     def __getitem__(self, item):
         if not isinstance(item, slice):
