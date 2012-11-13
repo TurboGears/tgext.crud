@@ -1,3 +1,7 @@
+0.5.6
+-----------------------
+* Make possible to choose whenever to rollback session or abort transaction when a database error occurs using the tgext.crud.abort_transactions option
+
 0.4 (Jan. 31, 2012)
 -----------------------
  * Support filtering results in table view when passing arguments to the url
