@@ -12,7 +12,7 @@ from sprox.providerselector import ProviderTypeSelector
 from sprox.fillerbase import TableFiller
 from sprox.formbase import AddRecordForm, EditableForm
 from sprox.fillerbase import RecordFiller, AddFormFiller
-from webhelpers.html import literal
+from markupsafe import Markup
 
 errors = ()
 try:
@@ -77,7 +77,7 @@ class CrudRestController(RestController):
     title = "Turbogears Admin System"
     keep_params = None
     remember_values = []
-    style = literal('''
+    style = Markup('''
 #menu_items {
   padding:0px 12px 0px 2px;
   list-style-type:None;
