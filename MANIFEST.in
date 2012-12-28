@@ -1,1 +1,2 @@
 recursive-include tgext/crud/templates *
+recursive-exclude tgext/crud/templates *.pyc
