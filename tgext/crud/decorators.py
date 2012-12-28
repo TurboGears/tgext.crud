@@ -110,7 +110,7 @@ def catch_errors(error_types=None, error_handler=None):
                 if isinstance(e, sqla_errors):
                     #if the error is a sqlalchemy error suppose we need to rollback the transaction
                     #so that the error handler can perform queries.
-                    if transactio is not None and config.get('tgext.crud.abort_transactions', False):
+                    if transaction is not None and config.get('tgext.crud.abort_transactions', False):
                         #This is in case we need to support multiple databases or two phase commit.
                         transaction.abort()
                     else:
