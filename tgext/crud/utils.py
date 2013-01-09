@@ -3,12 +3,8 @@ from validators import EntityValidator
 from sprox.tablebase import TableBase
 from sprox.fillerbase import TableFiller
 from markupsafe import Markup
+from markupsafe import escape_silent as escape
 import new
-
-try:
-    from html import escape
-except ImportError:
-    from cgi import escape
 
 try:
     from tw2.core import Widget as Tw2Widget
@@ -70,7 +66,7 @@ class SortableColumn(Column):
             new_params.pop('desc', None)
         new_params['order_by'] = self.options['sort_field']
 
-        return Markup('<a href="%s">%s</a>' % (url(request.path_url, params=new_params),
+        return Markup('<a href="%s">%s</a>' % (escape(url(request.path_url, params=new_params)),
                                                escape(self._title_)))
 
     title = property(get_title, set_title)
