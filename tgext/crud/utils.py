@@ -124,7 +124,7 @@ class SmartPaginationCollection():
         return self.total
 
     def __iter__(self):
-        return self
+        return iter(self.data)
 
 class RequestLocalTableFiller(TableFiller):
     """Work-around for the fact that sprox stores count of retrieved
