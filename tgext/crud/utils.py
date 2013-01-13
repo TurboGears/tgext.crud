@@ -1,4 +1,6 @@
-from tg import expose, validate, redirect, request, url
+from tg import expose, validate, redirect, request, url, tmpl_context
+from tg.decorators import paginate
+from tg.util import Bunch
 from validators import EntityValidator
 from sprox.tablebase import TableBase
 from sprox.fillerbase import TableFiller
@@ -144,4 +146,17 @@ class RequestLocalTableFiller(TableFiller):
 
     __count__ = property(get_request_local_count, set_request_local_count)
 
+class DisabledPager(object):
+    def pager(self, *args, **kw):
+        return ''
 
+class optional_paginate(paginate):
+    def before_render(self, remainder, params, output):
+        paginator = request.paginators[self.name]
+        if paginator.paginate_items_per_page < 0:
+            if not getattr(tmpl_context, 'paginators', None):
+                tmpl_context.paginators = Bunch()
+            tmpl_context.paginators[self.name] = DisabledPager()
+            return
+
+        super(optional_paginate, self).before_render(remainder, params, output)
