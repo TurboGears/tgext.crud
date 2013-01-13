@@ -124,7 +124,7 @@ class SmartPaginationCollection():
         return self.total
 
     def __iter__(self):
-        return self
+        raise NotImplementedError('SmartPaginationCollection can only be sliced, not iterated')
 
 class RequestLocalTableFiller(TableFiller):
     """Work-around for the fact that sprox stores count of retrieved
