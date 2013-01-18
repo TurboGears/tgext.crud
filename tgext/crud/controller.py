@@ -168,7 +168,7 @@ class CrudRestController(RestController):
         return pass_params
 
     def _adapt_menu_items(self, menu_items):
-        adapted_menu_items = {}
+        adapted_menu_items = type(menu_items)()
 
         for link, model in menu_items.iteritems():
             if inspect.isclass(model):
