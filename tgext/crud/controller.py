@@ -78,8 +78,7 @@ class CrudRestController(RestController):
     keep_params = None
     remember_values = []
     substring_filters = []
-    pagination = {'enabled':True,
-                  'items_per_page':7}
+    pagination = {'items_per_page': 7}
     style = Markup('''
 #menu_items {
   padding:0px 12px 0px 2px;
@@ -214,7 +213,7 @@ class CrudRestController(RestController):
         if tg.request.response_type == 'application/json':
             return self.table_filler.get_value(**kw)
 
-        if self.pagination['enabled']:
+        if self.pagination:
             paginator = request.paginators['value_list']
             paginator.paginate_items_per_page = self.pagination['items_per_page']
         else:
@@ -232,7 +231,7 @@ class CrudRestController(RestController):
             else:
                 substring_filters = self.substring_filters
 
-            if self.pagination['enabled'] and isinstance(self.table_filler, RequestLocalTableFiller):
+            if self.pagination and isinstance(self.table_filler, RequestLocalTableFiller):
                 paginator = request.paginators['value_list']
                 page = paginator.paginate_page - 1
                 values = self.table_filler.get_value(offset=page*paginator.paginate_items_per_page,
