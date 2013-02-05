@@ -77,6 +77,7 @@ class CrudRestController(RestController):
     title = "Turbogears Admin System"
     keep_params = None
     remember_values = []
+    substring_filters = []
     pagination = {'enabled':True,
                   'items_per_page':7}
     style = Markup('''
@@ -224,16 +225,23 @@ class CrudRestController(RestController):
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
             kw.pop('limit', None)
             kw.pop('offset', None)
+            kw.pop('substring_filters', None)
+
+            if self.substring_filters is True:
+                substring_filters = kw.keys()
+            else:
+                substring_filters = self.substring_filters
 
             if self.pagination['enabled'] and isinstance(self.table_filler, RequestLocalTableFiller):
                 paginator = request.paginators['value_list']
                 page = paginator.paginate_page - 1
                 values = self.table_filler.get_value(offset=page*paginator.paginate_items_per_page,
                                                      limit=paginator.paginate_items_per_page,
+                                                     substring_filters=substring_filters,
                                                      **kw)
                 values = SmartPaginationCollection(values, self.table_filler.__count__)
             else:
-                values = self.table_filler.get_value(**kw)
+                values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
         else:
             values = []
 
