@@ -131,13 +131,7 @@ class CrudRestController(RestController):
         tmpl_context.crud_helpers = self.helpers
         tmpl_context.crud_style = self.style
 
-    def __before__(self, *args, **kw):
-        # this will be removed in 2.2.*
-        tmpl_context.menu_items = self.menu_items
-        tmpl_context.title = self.title
-        tmpl_context.kept_params = self._kept_params()
-        tmpl_context.crud_helpers = self.helpers
-        tmpl_context.crud_style = self.style
+    __before__ = _before #This can be removed since 2.2
 
     def _mount_point(self):
         try:
