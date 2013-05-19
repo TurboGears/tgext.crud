@@ -204,9 +204,6 @@ class CrudRestController(RestController):
            Pagination is done by offset/limit in the filler method.
            Returns an HTML page with the records if not json.
         """
-        if tg.request.response_type == 'application/json':
-            return self.table_filler.get_value(**kw)
-
         if self.pagination:
             paginator = request.paginators['value_list']
             paginator.paginate_items_per_page = self.pagination['items_per_page']
@@ -214,6 +211,9 @@ class CrudRestController(RestController):
             paginator = request.paginators['value_list']
             paginator.paginate_items_per_page = -1
             paginator.paginate_page = 0
+
+        if tg.request.response_type == 'application/json':
+            return dict(value_list=self.table_filler.get_value(**kw))
 
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
             kw.pop('limit', None)
