@@ -57,6 +57,15 @@ def get_table_headers(table):
                 for field in table.__fields__
                 if field != '__actions__']
 
+def get_selection(headers, kw):
+    # Get the currently active filter
+    for field, _ in headers:
+        if field in kw:
+            # Early out - if the user specified multiple filters by hand, he won't need this anyway
+            return (field, kw[field])
+    # Returning a real tuple with str values here to minimize template code
+    return ('', '')
+
 class SortableColumn(Column):
     def __init__(self, name, *args, **kw):
         super(SortableColumn, self).__init__(name, *args, **kw)

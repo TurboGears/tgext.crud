@@ -7,7 +7,7 @@ from tg.controllers import RestController
 
 from decorators import registered_validate, register_validators, catch_errors
 from tgext.crud.utils import get_table_headers, SmartPaginationCollection, RequestLocalTableFiller
-from utils import create_setter, set_table_filler_getter, SortableTableBase, optional_paginate
+from utils import create_setter, set_table_filler_getter, SortableTableBase, optional_paginate, get_selection
 from sprox.providerselector import ProviderTypeSelector
 from sprox.fillerbase import TableFiller
 from sprox.formbase import AddRecordForm, EditableForm
@@ -239,12 +239,7 @@ class CrudRestController(RestController):
 
         tmpl_context.widget = self.table
         headers = get_table_headers(self.table)
-        # Get the currently active filter
-        selection = ('', '')
-        for field, _ in headers:
-            if field in kw:
-                selection = (field, kw[field])
-                break
+        selection = get_selection(headers, kw)
         return dict(model=self.model.__name__, value_list=values,
                     mount_point=self._mount_point(),
                     headers=headers, selection=selection)
