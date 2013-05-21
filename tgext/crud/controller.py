@@ -184,10 +184,10 @@ class CrudRestController(RestController):
             # search_fields can be either a list of tuples with (field, name) or just a string field = name
             search_fields = []
             for field in self.search_fields:
-                if isinstance(field, tuple):
-                    search_fields.append(field[0:2], kw.get(field, False))
-                else:
+                if isinstance(field, basestring):
                     search_fields.append((field, field), kw.get(field, False))
+                else:
+                    search_fields.append(field[0:2], kw.get(field, False))
             return search_fields
         else:
             # This would be where someone explicitly disabled the search functionality
@@ -270,6 +270,7 @@ class CrudRestController(RestController):
         current_search = self._get_current_search(search_fields)
         return dict(model=self.model.__name__, value_list=values,
                     mount_point=self._mount_point(),
+                    headers=search_fields,  # Just for backwards compatibility
                     search_fields=search_fields, current_search=current_search)
 
     @expose('genshi:tgext.crud.templates.get_one')
