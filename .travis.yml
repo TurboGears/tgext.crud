@@ -4,7 +4,7 @@ python:
   - "2.7"
 
 install:
-  - "pip install nose"
-  - "pip install git+git://github.com/TurboGears/tg2.git@development"
+  - "travis_retry pip install nose"
+  - "travis_retry pip install git+git://github.com/TurboGears/tg2.git@development"
 
 script: "python setup.py nosetests"
