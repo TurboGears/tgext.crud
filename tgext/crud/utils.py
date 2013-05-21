@@ -41,31 +41,6 @@ def set_table_filler_getter(filler, name, function):
     meth = new.instancemethod(function, filler, filler.__class__)
     setattr(filler, name, meth)
 
-def get_table_headers(table):
-    if hasattr(table, '__search_fields__'):
-        # This allows for customizing the search fields to be shown in the table definition
-        # __search_fields__ can be either a list of tuples with (field, name) or just a string field = name
-        headers = []
-        for field in table.__search_fields__:
-            if isinstance(field, tuple):
-                headers.append(field[0:2])
-            else:
-                headers.append((field, field))
-        return headers
-    else:
-        return [(field, table.__headers__.get(field, field))
-                for field in table.__fields__
-                if field != '__actions__']
-
-def get_selection(headers, kw):
-    # Get the currently active filter
-    for field, _ in headers:
-        if field in kw:
-            # Early out - if the user specified multiple filters by hand, he won't need this anyway
-            return (field, kw[field])
-    # Returning a real tuple with str values here to minimize template code
-    return ('', '')
-
 class SortableColumn(Column):
     def __init__(self, name, *args, **kw):
         super(SortableColumn, self).__init__(name, *args, **kw)
