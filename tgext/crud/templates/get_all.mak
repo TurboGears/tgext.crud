@@ -40,7 +40,7 @@ ${parent.meta()}
                     % endif
                   % endfor
               </select>
-              <input id="crud_search_value" name="${selection[0]}" type="text" placeholder="equals" value="${selection[1]}" />
+              <input id="crud_search_value" name="${selection[0] or headers[0][0]}" type="text" placeholder="equals / contains" value="${selection[1]}" />
               <input type="submit" value="Search"/>
           </form>
       </div>
