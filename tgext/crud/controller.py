@@ -22,7 +22,6 @@ except ImportError:
     pass
 
 import urlparse, cgi, inspect
-from tg.decorators import paginate
 
 class CrudRestControllerHelpers(object):
     def make_link(self, where, pk_count=0):
@@ -267,7 +266,7 @@ class CrudRestController(RestController):
         tmpl_context.widget = self.edit_form
         pks = self.provider.get_primary_fields(self.model)
         kw = {}
-        for i, pk in  enumerate(pks):
+        for i, pk in enumerate(pks):
             kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
         value['_method'] = 'PUT'
@@ -282,11 +281,16 @@ class CrudRestController(RestController):
         tmpl_context.widget = self.new_form
         return dict(value=kw, model=self.model.__name__)
 
+    @expose(content_type='text/html')
+    @expose('json:', content_type='application/json')
     @catch_errors(errors, error_handler=new)
-    @expose()
     @registered_validate(error_handler=new)
     def post(self, *args, **kw):
-        self.provider.create(self.model, params=kw)
+        obj = self.provider.create(self.model, params=kw)
+
+        if tg.request.response_type == 'application/json':
+            return dict(**self.provider.dictify(obj))
+
         raise redirect('./', params=self._kept_params())
 
     @expose()

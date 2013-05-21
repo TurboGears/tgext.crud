@@ -33,6 +33,18 @@ setup(name='tgext.crud',
           'sprox>=0.8.3',
           # -*- Extra requirements: -*-
       ],
+      test_suite='nose.collector',
+      tests_require=[
+          'nose',
+          'webtest',
+          'TurboGears2',
+          'jinja2',
+          'sqlalchemy',
+          'zope.sqlalchemy',
+          'transaction',
+          'tw2.core',
+          'tw2.forms'
+      ],
       entry_points="""
       # -*- Entry points: -*-
       """,

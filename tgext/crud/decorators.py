@@ -2,7 +2,8 @@
 """
 from decorator import decorator
 from tg.decorators import validate as tgValidate
-from tg import flash, config
+from tg import flash, config, request, response
+from tgext.crud.validators import report_json_error
 
 try:
     import transaction
@@ -38,7 +39,7 @@ class registered_validate(tgValidate):
     >>>         raise Exception
     """
     def __init__(self, error_handler=None, *args,**kw):
-        self.error_handler = error_handler
+        self._error_handler = error_handler
         self.needs_controller = True
         class Validators(object):
             def validate(self, controller, params, state):
@@ -48,6 +49,19 @@ class registered_validate(tgValidate):
                     v = validators[func_name].validate(params)
                     return v
         self.validators = Validators()
+
+    @property
+    def error_handler(self):
+        try:
+            response_type = request.response_type
+        except:
+            response_type = None
+
+        if response_type == 'application/json':
+            return report_json_error
+        else:
+            return self._error_handler
+
         
 def register_validators(controller, name, validators):
     """
@@ -96,6 +110,10 @@ def catch_errors(error_types=None, error_handler=None):
                 except:
                     message=None
             if message:
+                if request.response_type == 'application/json':
+                    response.status_code = 400
+                    return dict(message=message)
+
                 flash(message,status="status_alert")
                 # have to get the instance that matches the error handler.  This is not a great solution, but it's 
                 # what we've got for now.
