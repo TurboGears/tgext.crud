@@ -6,7 +6,7 @@ from tg.decorators import without_trailing_slash, with_trailing_slash
 from tg.controllers import RestController
 
 from decorators import registered_validate, register_validators, catch_errors
-from tgext.crud.utils import get_table_headers, SmartPaginationCollection, RequestLocalTableFiller
+from tgext.crud.utils import SmartPaginationCollection, RequestLocalTableFiller
 from utils import create_setter, set_table_filler_getter, SortableTableBase, optional_paginate
 from sprox.providerselector import ProviderTypeSelector
 from sprox.fillerbase import TableFiller
@@ -77,6 +77,7 @@ class CrudRestController(RestController):
     keep_params = None
     remember_values = []
     substring_filters = []
+    search_fields = True  # True for automagic
     pagination = {'items_per_page': 7}
     style = Markup('''
 #menu_items {
@@ -171,6 +172,33 @@ class CrudRestController(RestController):
                 adapted_menu_items[link] = model
         return adapted_menu_items
 
+    def _get_search_fields(self, kw):
+        if self.search_fields is True:
+            return [
+                (field, self.table.__headers__.get(field, field), kw.get(field, False))
+                    for field in self.table.__fields__
+                        if field != '__actions__'
+                ]
+        elif self.search_fields:
+            # This allows for customizing the search fields to be shown in the table definition
+            # search_fields can be either a list of tuples with (field, name) or just a string field = name
+            search_fields = []
+            for field in self.search_fields:
+                if isinstance(field, basestring):
+                    search_fields.append((field, field), kw.get(field, False))
+                else:
+                    search_fields.append(field[0:2], kw.get(field, False))
+            return search_fields
+        else:
+            # This would be where someone explicitly disabled the search functionality
+            return []
+
+    def _get_current_search(self, search_fields):
+        for field, _, value in search_fields:
+            if value is not False:
+                return (field, value)
+        return (search_fields[0][0], '')
+
     def __init__(self, session, menu_items=None):
         if menu_items is None:
             menu_items = {}
@@ -238,10 +266,12 @@ class CrudRestController(RestController):
             values = []
 
         tmpl_context.widget = self.table
-        headers = get_table_headers(self.table)
+        search_fields = self._get_search_fields(kw)
+        current_search = self._get_current_search(search_fields)
         return dict(model=self.model.__name__, value_list=values,
                     mount_point=self._mount_point(),
-                    headers=headers)
+                    headers=search_fields,  # Just for backwards compatibility
+                    search_fields=search_fields, current_search=current_search)
 
     @expose('genshi:tgext.crud.templates.get_one')
     @expose('mako:tgext.crud.templates.get_one')
