@@ -35,10 +35,12 @@
         <div id="crud_search">
             <form>
                 <select id="crud_search_field" onchange="crud_search_field_changed(this);">
-                    <option value="${headers[0][0]}" selected="selected">${headers[0][1]}</option>
-                    <option py:for="field,name in headers[1:]" value="${field}">${name}</option>
+                  <py:for each="field, name in headers" py:choose="field">
+                    <option py:when="selection[0]" value="${field}" selected="selected">${name}</option>
+                    <option py:otherwise="" value="${field}">${name}</option>
+                  </py:for>
                 </select>
-                <input id="crud_search_value" name="${headers[0][0]}" type="text" placeholder="equals"/>
+                <input id="crud_search_value" name="${selection[0]}" type="text" placeholder="equals" value="${selection[1]}" />
                 <input type="submit" value="Search"/>
             </form>
         </div>

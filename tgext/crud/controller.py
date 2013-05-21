@@ -239,9 +239,15 @@ class CrudRestController(RestController):
 
         tmpl_context.widget = self.table
         headers = get_table_headers(self.table)
+        # Get the currently active filter
+        selection = ('', '')
+        for field, _ in headers:
+            if field in kw:
+                selection = (field, kw[field])
+                break
         return dict(model=self.model.__name__, value_list=values,
                     mount_point=self._mount_point(),
-                    headers=headers)
+                    headers=headers, selection=selection)
 
     @expose('genshi:tgext.crud.templates.get_one')
     @expose('mako:tgext.crud.templates.get_one')

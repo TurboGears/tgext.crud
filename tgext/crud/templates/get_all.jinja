@@ -41,12 +41,15 @@
         <div id="crud_search">
             <form>
                 <select id="crud_search_field" onchange="crud_search_field_changed(this);">
-                    <option value="{{ headers[0][0] }}" selected="selected">{{ headers[0][1] }}</option>
-                    {% for field,name in headers[1:] %}
-                    <option value="{{ field }}">{{ name }}</option>
+                    {% for field, name in headers %}
+                      {% if field == selection[0] %}
+                        <option value="{{ field }}" selected="selected">{{ name }}</option>
+                      {% else %}
+                        <option value="{{ field }}">{{ name }}</option>
+                      {% endif %}
                     {% endfor %}
                 </select>
-                <input id="crud_search_value" name="{{ headers[0][0] }} " type="text" placeholder="equals"/>
+                <input id="crud_search_value" name="{{ selection[0] }} " type="text" placeholder="equals" value="{{ selection[1] }}" />
                 <input type="submit" value="Search"/>
             </form>
         </div>
