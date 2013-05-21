@@ -38,18 +38,23 @@
         {% if value_list is defined %}
         <span>{{ tmpl_context.paginators.value_list.pager(link=mount_point+'/') }}</span>
         {% endif%}
-        <div id="crud_search">
+        {% if search_fields %}
+          <div id="crud_search">
             <form>
                 <select id="crud_search_field" onchange="crud_search_field_changed(this);">
-                    <option value="{{ headers[0][0] }}" selected="selected">{{ headers[0][1] }}</option>
-                    {% for field,name in headers[1:] %}
-                    <option value="{{ field }}">{{ name }}</option>
+                    {% for field, name, selected in search_fields %}
+                      {% if selected is not False %}
+                        <option value="{{ field }}" selected="selected">{{ name }}</option>
+                      {% else %}
+                        <option value="{{ field }}">{{ name }}</option>
+                      {% endif %}
                     {% endfor %}
                 </select>
-                <input id="crud_search_value" name="{{ headers[0][0] }} " type="text" placeholder="equals"/>
+                <input id="crud_search_value" name="{{ current_search[0] }} " type="text" placeholder="equals / contains" value="{{ current_search[1] }}" />
                 <input type="submit" value="Search"/>
             </form>
-        </div>
+          </div>
+        {% endif %}
       </div>
       <div class="crud_table">
         {{ tmpl_context.widget(value=value_list, action=mount_point+'.json')|safe }}
