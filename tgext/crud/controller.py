@@ -2,12 +2,13 @@
 """
 import tg
 from tg import expose, flash, redirect, tmpl_context, request
-from tg.decorators import without_trailing_slash, with_trailing_slash
+from tg.decorators import without_trailing_slash, with_trailing_slash, before_validate
 from tg.controllers import RestController
 
-from decorators import registered_validate, register_validators, catch_errors
-from tgext.crud.utils import SmartPaginationCollection, RequestLocalTableFiller
-from utils import create_setter, set_table_filler_getter, SortableTableBase, optional_paginate
+from tgext.crud.decorators import (registered_validate, register_validators, catch_errors,
+                                   optional_paginate)
+from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller, create_setter,
+                              set_table_filler_getter, SortableTableBase, map_args_to_pks)
 from sprox.providerselector import ProviderTypeSelector
 from sprox.fillerbase import TableFiller
 from sprox.formbase import AddRecordForm, EditableForm
@@ -224,7 +225,7 @@ class CrudRestController(RestController):
     @expose('genshi:tgext.crud.templates.get_all')
     @expose('mako:tgext.crud.templates.get_all')
     @expose('jinja:tgext.crud.templates.get_all')
-    @expose('json')
+    @expose('json:')
     @optional_paginate('value_list')
     def get_all(self, *args, **kw):
         """Return all records.
@@ -240,7 +241,8 @@ class CrudRestController(RestController):
             paginator.paginate_page = 0
 
         if tg.request.response_type == 'application/json':
-            return dict(value_list=self.table_filler.get_value(**kw))
+            count, entries = self.table_filler._do_get_provider_count_and_objs(**kw)
+            return dict(value_list=entries)
 
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
             kw.pop('limit', None)
@@ -276,28 +278,29 @@ class CrudRestController(RestController):
     @expose('genshi:tgext.crud.templates.get_one')
     @expose('mako:tgext.crud.templates.get_one')
     @expose('jinja:tgext.crud.templates.get_one')
-    @expose('json')
+    @expose('json:')
     def get_one(self, *args, **kw):
         """get one record, returns HTML or json"""
         #this would probably only be realized as a json stream
+        kw = map_args_to_pks(args, {})
+
+        if tg.request.response_type == 'application/json':
+            return dict(model=self.model.__name__,
+                        value=self.provider.get_obj(self.model, kw))
+
         tmpl_context.widget = self.edit_form
-        pks = self.provider.get_primary_fields(self.model)
-        kw = {}
-        for i, pk in  enumerate(pks):
-            kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
-        return dict(value=value,model=self.model.__name__)
+        return dict(value=value, model=self.model.__name__)
 
     @expose('genshi:tgext.crud.templates.edit')
     @expose('mako:tgext.crud.templates.edit')
     @expose('jinja:tgext.crud.templates.edit')
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
-        tmpl_context.widget = self.edit_form
         pks = self.provider.get_primary_fields(self.model)
-        kw = {}
-        for i, pk in enumerate(pks):
-            kw[pk] = args[i]
+        kw = map_args_to_pks(args, {})
+
+        tmpl_context.widget = self.edit_form
         value = self.edit_filler.get_value(kw)
         value['_method'] = 'PUT'
         return dict(value=value, model=self.model.__name__, pk_count=len(pks))
@@ -319,20 +322,17 @@ class CrudRestController(RestController):
         obj = self.provider.create(self.model, params=kw)
 
         if tg.request.response_type == 'application/json':
-            return dict(**self.provider.dictify(obj))
+            return dict(model=self.model.__name__, value=obj)
 
-        raise redirect('./', params=self._kept_params())
+        return redirect('./', params=self._kept_params())
 
-    @expose()
+    @expose(content_type='text/html')
+    @expose('json:', content_type='application/json')
+    @before_validate(map_args_to_pks)
     @registered_validate(error_handler=edit)
     @catch_errors(errors, error_handler=edit)
     def put(self, *args, **kw):
         """update"""
-        pks = self.provider.get_primary_fields(self.model)
-        for i, pk in enumerate(pks):
-            if pk not in kw and i < len(args):
-                kw[pk] = args[i]
-
         omit_fields = []
         if getattr(self, 'edit_form', None):
             omit_fields.extend(self.edit_form.__omit_fields__)
@@ -342,18 +342,31 @@ class CrudRestController(RestController):
             if value is None or value == '':
                 omit_fields.append(remembered_value)
 
-        self.provider.update(self.model, params=kw, omit_fields=omit_fields)
-        redirect('../' * len(pks), params=self._kept_params())
+        obj = self.provider.update(self.model, params=kw, omit_fields=omit_fields)
+        if tg.request.response_type == 'application/json':
+            return dict(model=self.model.__name__, value=obj)
 
-    @expose()
+        pks = self.provider.get_primary_fields(self.model)
+        return redirect('../' * len(pks), params=self._kept_params())
+
+    @expose(content_type='text/html')
+    @expose('json:', content_type='application/json')
     def post_delete(self, *args, **kw):
         """This is the code that actually deletes the record"""
+        kw = map_args_to_pks(args, {})
+
+        obj = None
+        if kw:
+            obj = self.provider.get_obj(self.model, kw)
+
+        if obj is not None:
+            self.provider.delete(self.model, kw)
+
+        if tg.request.response_type == 'application/json':
+            return dict()
+
         pks = self.provider.get_primary_fields(self.model)
-        d = {}
-        for i, arg in enumerate(args):
-            d[pks[i]] = arg
-        self.provider.delete(self.model, d)
-        redirect('./' + '../' * (len(pks) - 1), params=self._kept_params())
+        return redirect('./' + '../' * (len(pks) - 1), params=self._kept_params())
 
     @expose('genshi:tgext.crud.templates.get_delete')
     @expose('jinja:tgext.crud.templates.get_delete')

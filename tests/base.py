@@ -4,8 +4,9 @@ from webtest import TestApp
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Text, Date
 from zope.sqlalchemy import ZopeTransactionExtension
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 
 maker = sessionmaker(autoflush=True, autocommit=False,
                      extension=ZopeTransactionExtension())
@@ -14,14 +15,39 @@ DeclarativeBase = declarative_base()
 metadata = DeclarativeBase.metadata
 
 
+class Genre(DeclarativeBase):
+    __tablename__ = "genres"
+
+    genre_id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+
+
 class Movie(DeclarativeBase):
     __tablename__ = "movies"
 
     movie_id = Column(Integer, primary_key=True)
     title = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    release_date = Column(Date, nullable=True)
+    release_date = Column(Date, nullable=True, default=datetime.utcnow)
 
+    genre_id = Column(Integer, ForeignKey(Genre.genre_id), nullable=True)
+    genre = relationship(Genre)
+
+
+class Actor(DeclarativeBase):
+    __tablename__ = "actors"
+
+    actor_id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+
+    movie_id = Column(Integer, ForeignKey(Movie.movie_id), nullable=True)
+    movie = relationship(Movie, backref='actors')
+
+    def __json__(self):
+        return {'name':self.name,
+                'movie_id':self.movie_id,
+                'actor_id':self.actor_id,
+                'movie_title':self.movie and self.movie.title or None}
 
 class FakeModel(object):
     __file__ = 'model.py'

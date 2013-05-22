@@ -1,6 +1,6 @@
 from tg import TGController
 from tgext.crud import EasyCrudRestController
-from .base import CrudTest, Movie, DBSession, metadata
+from .base import CrudTest, Movie, DBSession, metadata, Actor
 
 
 class TestCrudHTML(CrudTest):
@@ -29,7 +29,7 @@ class TestCrudHTML(CrudTest):
         assert DBSession.query(Movie).first() is None
 
     def test_post_validation_dberror(self):
-        metadata.drop_all()
+        metadata.drop_all(tables=[Movie.__table__])
 
         result = self.app.post('/movies/', params={'title':'Movie Test'})
         assert '<form action=' in result

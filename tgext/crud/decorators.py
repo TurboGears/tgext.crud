@@ -2,8 +2,11 @@
 """
 from decorator import decorator
 from tg.decorators import validate as tgValidate
-from tg import flash, config, request, response
+from tg import flash, config, request, response, tmpl_context
 from tgext.crud.validators import report_json_error
+from tgext.crud.utils import DisabledPager
+from tg.decorators import paginate
+from tg.util import Bunch
 
 try:
     import transaction
@@ -139,3 +142,14 @@ def catch_errors(error_types=None, error_handler=None):
         return value
     return decorator(wrapper)
 
+
+class optional_paginate(paginate):
+    def before_render(self, remainder, params, output):
+        paginator = request.paginators[self.name]
+        if paginator.paginate_items_per_page < 0:
+            if not getattr(tmpl_context, 'paginators', None):
+                tmpl_context.paginators = Bunch()
+            tmpl_context.paginators[self.name] = DisabledPager()
+            return
+
+        super(optional_paginate, self).before_render(remainder, params, output)
