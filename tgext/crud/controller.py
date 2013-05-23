@@ -8,7 +8,8 @@ from tg.controllers import RestController
 from tgext.crud.decorators import (registered_validate, register_validators, catch_errors,
                                    optional_paginate)
 from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller, create_setter,
-                              set_table_filler_getter, SortableTableBase, map_args_to_pks)
+                              set_table_filler_getter, SortableTableBase, map_args_to_pks,
+                              adapt_params_for_pagination)
 from sprox.providerselector import ProviderTypeSelector
 from sprox.fillerbase import TableFiller
 from sprox.formbase import AddRecordForm, EditableForm
@@ -79,6 +80,7 @@ class CrudRestController(RestController):
     remember_values = []
     substring_filters = []
     search_fields = True  # True for automagic
+    json_dictify = False # True is slower but provides relations
     pagination = {'items_per_page': 7}
     style = Markup('''
 #menu_items {
@@ -200,6 +202,23 @@ class CrudRestController(RestController):
                 return (field, value)
         return (search_fields[0][0], '')
 
+    def _dictify(self, value, length=None):
+        json_dictify = self.json_dictify
+        if json_dictify is False:
+            return value
+
+        def _dictify(entity):
+            if hasattr(entity, '__json__'):
+                return entity.__json__()
+            else:
+                return self.provider.dictify(entity, **json_dictify)
+
+        if length is not None:
+            #return a generator, we don't want to consume the whole query if it is paginated
+            return (_dictify(entity) for entity in value)
+        else:
+            return _dictify(value)
+
     def __init__(self, session, menu_items=None):
         if menu_items is None:
             menu_items = {}
@@ -208,6 +227,10 @@ class CrudRestController(RestController):
         self.provider = ProviderTypeSelector().get_selector(self.model).get_provider(self.model, hint=session)
         
         self.session = session
+
+        self.pagination_enabled = (self.pagination and isinstance(self.table_filler, RequestLocalTableFiller))
+        if self.json_dictify is True:
+            self.json_dictify = {}
 
         #this makes crc declarative
         check_types = ['new_form', 'edit_form', 'table', 'table_filler', 'edit_filler']
@@ -241,29 +264,24 @@ class CrudRestController(RestController):
             paginator.paginate_page = 0
 
         if tg.request.response_type == 'application/json':
-            count, entries = self.table_filler._do_get_provider_count_and_objs(**kw)
-            return dict(value_list=entries)
+            adapt_params_for_pagination(kw, self.pagination_enabled)
+            count, values = self.table_filler._do_get_provider_count_and_objs(**kw)
+            values = self._dictify(values, length=count)
+            if self.pagination_enabled:
+                values = SmartPaginationCollection(values, count)
+            return dict(value_list=values)
 
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
-            kw.pop('limit', None)
-            kw.pop('offset', None)
             kw.pop('substring_filters', None)
-
             if self.substring_filters is True:
                 substring_filters = kw.keys()
             else:
                 substring_filters = self.substring_filters
 
-            if self.pagination and isinstance(self.table_filler, RequestLocalTableFiller):
-                paginator = request.paginators['value_list']
-                page = paginator.paginate_page - 1
-                values = self.table_filler.get_value(offset=page*paginator.paginate_items_per_page,
-                                                     limit=paginator.paginate_items_per_page,
-                                                     substring_filters=substring_filters,
-                                                     **kw)
+            adapt_params_for_pagination(kw, self.pagination_enabled)
+            values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
+            if self.pagination_enabled:
                 values = SmartPaginationCollection(values, self.table_filler.__count__)
-            else:
-                values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
         else:
             values = []
 
@@ -285,8 +303,9 @@ class CrudRestController(RestController):
         kw = map_args_to_pks(args, {})
 
         if tg.request.response_type == 'application/json':
+            obj = self.provider.get_obj(self.model, kw)
             return dict(model=self.model.__name__,
-                        value=self.provider.get_obj(self.model, kw))
+                        value=self._dictify(obj))
 
         tmpl_context.widget = self.edit_form
         value = self.edit_filler.get_value(kw)
@@ -322,7 +341,8 @@ class CrudRestController(RestController):
         obj = self.provider.create(self.model, params=kw)
 
         if tg.request.response_type == 'application/json':
-            return dict(model=self.model.__name__, value=obj)
+            return dict(model=self.model.__name__,
+                        value=self._dictify(obj))
 
         return redirect('./', params=self._kept_params())
 
@@ -344,7 +364,8 @@ class CrudRestController(RestController):
 
         obj = self.provider.update(self.model, params=kw, omit_fields=omit_fields)
         if tg.request.response_type == 'application/json':
-            return dict(model=self.model.__name__, value=obj)
+            return dict(model=self.model.__name__,
+                        value=self._dictify(obj))
 
         pks = self.provider.get_primary_fields(self.model)
         return redirect('../' * len(pks), params=self._kept_params())

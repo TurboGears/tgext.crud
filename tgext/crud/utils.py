@@ -152,3 +152,14 @@ def map_args_to_pks(remainder, params):
             params[pk] = remainder[i]
 
     return params
+
+def adapt_params_for_pagination(params, pagination_enabled=True):
+    params.pop('limit', None)
+    params.pop('offset', None)
+
+    if pagination_enabled:
+        paginator = request.paginators['value_list']
+        page = paginator.paginate_page - 1
+
+        params['offset'] = page*paginator.paginate_items_per_page
+        params['limit'] = paginator.paginate_items_per_page
