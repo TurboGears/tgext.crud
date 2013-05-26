@@ -81,6 +81,7 @@ class CrudRestController(RestController):
     substring_filters = []
     search_fields = True  # True for automagic
     json_dictify = False # True is slower but provides relations
+    conditional_update_field = None
     pagination = {'items_per_page': 7}
     style = Markup('''
 #menu_items {
@@ -306,6 +307,9 @@ class CrudRestController(RestController):
             obj = self.provider.get_obj(self.model, kw)
             if obj is None:
                 tg.response.status_code = 404
+            elif self.conditional_update_field is not None:
+                tg.response.last_modified = getattr(obj, self.conditional_update_field)
+
             return dict(model=self.model.__name__,
                         value=self._dictify(obj))
 
@@ -344,6 +348,9 @@ class CrudRestController(RestController):
         obj = self.provider.create(self.model, params=kw)
 
         if tg.request.response_type == 'application/json':
+            if obj is not None and self.conditional_update_field is not None:
+                tg.response.last_modified = getattr(obj, self.conditional_update_field)
+
             return dict(model=self.model.__name__,
                         value=self._dictify(obj))
 
@@ -368,12 +375,24 @@ class CrudRestController(RestController):
 
         obj = self.provider.get_obj(self.model, kw)
 
-        if obj is not None:
+        #This should actually by done by provider.update to make it atomic
+        can_modify = True
+        if obj is not None and self.conditional_update_field is not None and \
+           tg.request.if_unmodified_since is not None and \
+           tg.request.if_unmodified_since < getattr(obj, self.conditional_update_field):
+                can_modify = False
+
+        if obj is not None and can_modify:
             obj = self.provider.update(self.model, params=kw, omit_fields=omit_fields)
 
         if tg.request.response_type == 'application/json':
             if obj is None:
                 tg.response.status_code = 404
+            elif can_modify is False:
+                tg.response.status_code = 412
+            elif self.conditional_update_field is not None:
+                tg.response.last_modified = getattr(obj, self.conditional_update_field)
+
             return dict(model=self.model.__name__,
                         value=self._dictify(obj))
 

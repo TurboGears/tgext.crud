@@ -1,6 +1,7 @@
 from tg import TGController
 from tgext.crud import EasyCrudRestController
-from .base import CrudTest, Movie, DBSession, metadata, Genre, Actor
+from .base import CrudTest, Movie, DBSession, metadata, Genre, Actor, MODIFICATION_DATE
+from webob import serialize_date
 
 import transaction
 
@@ -131,7 +132,7 @@ class TestRestJsonEditCreateDelete(CrudTest):
 
 class TestRestJsonRead(CrudTest):
     """Basic tests for GET requests with JSON responses"""
-    
+
     def controller_factory(self):
         class MovieController(EasyCrudRestController):
             model = Movie
@@ -377,3 +378,48 @@ class TestRestJsonEditCreateJsonBody(CrudTest):
         assert len(result.json['value']['actors']) == 2, result
 
         assert DBSession.query(Actor).filter_by(movie_id=movie['movie_id']).count() == 2
+
+class TestRestJsonConditionalPut(CrudTest):
+    def controller_factory(self):
+        class MovieController(EasyCrudRestController):
+            model = Movie
+            conditional_update_field = 'updated_at'
+
+        class RestJsonController(TGController):
+            movies = MovieController(DBSession)
+
+        return RestJsonController()
+
+    def test_put_failed(self):
+        result = self.app.post_json('/movies.json', params={'title':'Movie Test'})
+        movie = result.json['value']
+        assert result.last_modified == MODIFICATION_DATE
+
+        previous_date = MODIFICATION_DATE.replace(year=result.last_modified.year-1)
+        result = self.app.put_json('/movies/%s.json' % movie['movie_id'], status=412,
+                              headers=[('If-Unmodified-Since', serialize_date(previous_date))],
+                              params={'title':'New Title'})
+        assert result.json['value']['title'] == 'Movie Test'
+
+    def test_put(self):
+        result = self.app.post_json('/movies.json', params={'title':'Movie Test'})
+        movie = result.json['value']
+        assert result.last_modified == MODIFICATION_DATE
+
+        previous_date = MODIFICATION_DATE.replace(year=result.last_modified.year+1)
+        result = self.app.put_json('/movies/%s.json' % movie['movie_id'], status=200,
+                              headers=[('If-Unmodified-Since', serialize_date(previous_date))],
+                              params={'title':'New Title'})
+        assert result.json['value']['title'] == 'New Title'
+
+    def test_get_one(self):
+        result = self.app.post_json('/movies.json', params={'title':'Movie Test'})
+        orig_movie = result.json['value']
+
+        result = self.app.get('/movies/%s.json' % orig_movie['movie_id'])
+        assert result.last_modified == MODIFICATION_DATE
+
+        movie = result.json
+        assert movie['model'] == 'Movie', result
+        assert movie['value']['title'] == orig_movie['title']
+        assert movie['value']['movie_id'] == orig_movie['movie_id']

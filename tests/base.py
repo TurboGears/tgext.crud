@@ -7,6 +7,7 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+from webob import UTC
 
 maker = sessionmaker(autoflush=True, autocommit=False,
                      extension=ZopeTransactionExtension())
@@ -14,6 +15,7 @@ DBSession = scoped_session(maker)
 DeclarativeBase = declarative_base()
 metadata = DeclarativeBase.metadata
 
+MODIFICATION_DATE = datetime(2010, 1, 1, 12, 0, tzinfo=UTC)
 
 class Genre(DeclarativeBase):
     __tablename__ = "genres"
@@ -33,6 +35,9 @@ class Movie(DeclarativeBase):
     genre_id = Column(Integer, ForeignKey(Genre.genre_id), nullable=True)
     genre = relationship(Genre)
 
+    @property
+    def updated_at(self):
+        return MODIFICATION_DATE
 
 class Actor(DeclarativeBase):
     __tablename__ = "actors"
