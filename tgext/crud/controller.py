@@ -9,7 +9,7 @@ from tgext.crud.decorators import (registered_validate, register_validators, cat
                                    optional_paginate)
 from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller, create_setter,
                               set_table_filler_getter, SortableTableBase, map_args_to_pks,
-                              adapt_params_for_pagination)
+                              adapt_params_for_pagination, allow_json_parameters)
 from sprox.providerselector import ProviderTypeSelector
 from sprox.fillerbase import TableFiller
 from sprox.formbase import AddRecordForm, EditableForm
@@ -337,6 +337,7 @@ class CrudRestController(RestController):
 
     @expose(content_type='text/html')
     @expose('json:', content_type='application/json')
+    @before_validate(allow_json_parameters)
     @catch_errors(errors, error_handler=new)
     @registered_validate(error_handler=new)
     def post(self, *args, **kw):
@@ -350,6 +351,7 @@ class CrudRestController(RestController):
 
     @expose(content_type='text/html')
     @expose('json:', content_type='application/json')
+    @before_validate(allow_json_parameters)
     @before_validate(map_args_to_pks)
     @registered_validate(error_handler=edit)
     @catch_errors(errors, error_handler=edit)

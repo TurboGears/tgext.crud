@@ -163,3 +163,7 @@ def adapt_params_for_pagination(params, pagination_enabled=True):
 
         params['offset'] = page*paginator.paginate_items_per_page
         params['limit'] = paginator.paginate_items_per_page
+
+def allow_json_parameters(remainder, params):
+    if request.content_type == 'application/json':
+        params.update(request.json_body)
