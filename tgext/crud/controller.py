@@ -304,6 +304,8 @@ class CrudRestController(RestController):
 
         if tg.request.response_type == 'application/json':
             obj = self.provider.get_obj(self.model, kw)
+            if obj is None:
+                tg.response.status_code = 404
             return dict(model=self.model.__name__,
                         value=self._dictify(obj))
 
@@ -362,8 +364,14 @@ class CrudRestController(RestController):
             if value is None or value == '':
                 omit_fields.append(remembered_value)
 
-        obj = self.provider.update(self.model, params=kw, omit_fields=omit_fields)
+        obj = self.provider.get_obj(self.model, kw)
+
+        if obj is not None:
+            obj = self.provider.update(self.model, params=kw, omit_fields=omit_fields)
+
         if tg.request.response_type == 'application/json':
+            if obj is None:
+                tg.response.status_code = 404
             return dict(model=self.model.__name__,
                         value=self._dictify(obj))
 

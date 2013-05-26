@@ -55,6 +55,24 @@ class TestRestJsonEditCreateDelete(CrudTest):
         movie = DBSession.query(Movie).first()
         assert movie.title == 'Movie Test'
 
+    def test_put_missing(self):
+        result = self.app.post('/movies.json', params={'title':'Movie Test'})
+        movie = result.json['value']
+        movie_id = movie['movie_id'] + 100
+
+        result = self.app.put('/movies/%s.json' % movie_id, status=404,
+                              params={'title':'New Title'})
+        result = result.json
+        assert result['value'] is None
+
+    def test_put_invalid(self):
+        movie_id = 'A'
+
+        result = self.app.put('/movies/%s.json' % movie_id, status=400,
+                              params={'title':'New Title'})
+        result = result.json
+        assert result['movie_id'] != None
+
     def test_put_relationship(self):
         result = self.app.post('/movies.json', params={'title':'Movie Test'})
         movie = result.json['value']
@@ -133,7 +151,7 @@ class TestRestJsonRead(CrudTest):
         map(DBSession.add, actors)
 
         DBSession.add(Movie(title='First Movie', genre=genre, actors=actors[:2]))
-        DBSession.add(Movie(title='Second Movie', genre=genre, actors=actors[:2]))
+        DBSession.add(Movie(title='Second Movie', genre=genre))
         DBSession.add(Movie(title='Third Movie', genre=genre))
         DBSession.add(Movie(title='Fourth Movie', genre=genre))
         DBSession.add(Movie(title='Fifth Movie'))
@@ -181,6 +199,21 @@ class TestRestJsonRead(CrudTest):
         assert result['value']['title'] == movie.title
         assert result['value']['movie_id'] == movie.movie_id
 
+    def test_get_missing(self):
+        movie = DBSession.query(Movie).order_by(Movie.movie_id.desc()).first()
+        movie_id = movie.movie_id + 100
+
+        result = self.app.get('/movies/%s.json' % movie_id, status=404)
+        result = result.json
+        assert result['value'] is None
+
+    def test_get_invalid(self):
+        movie_id = 'A'
+
+        result = self.app.get('/movies/%s.json' % movie_id, status=404)
+        result = result.json
+        assert result['value'] is None
+
     def test_get_one___json__(self):
         actor = DBSession.query(Actor).filter(Actor.movie_id!=None).first()
         movie_title = actor.movie.title
@@ -218,7 +251,7 @@ class TestRestJsonReadDictified(CrudTest):
         map(DBSession.add, actors)
 
         DBSession.add(Movie(title='First Movie', genre=genre, actors=actors[:2]))
-        DBSession.add(Movie(title='Second Movie', genre=genre, actors=actors[:2]))
+        DBSession.add(Movie(title='Second Movie', genre=genre))
         DBSession.add(Movie(title='Third Movie', genre=genre))
         DBSession.add(Movie(title='Fourth Movie', genre=genre))
         DBSession.add(Movie(title='Fifth Movie'))
