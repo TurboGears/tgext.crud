@@ -1,7 +1,7 @@
 """
 """
 import tg
-from tg import expose, flash, redirect, tmpl_context, request
+from tg import expose, flash, redirect, tmpl_context, request, abort
 from tg.decorators import without_trailing_slash, with_trailing_slash, before_validate
 from tg.controllers import RestController
 
@@ -266,7 +266,10 @@ class CrudRestController(RestController):
 
         if tg.request.response_type == 'application/json':
             adapt_params_for_pagination(kw, self.pagination_enabled)
-            count, values = self.table_filler._do_get_provider_count_and_objs(**kw)
+            try:
+                count, values = self.table_filler._do_get_provider_count_and_objs(**kw)
+            except Exception as e:
+                abort(400, detail=unicode(e))
             values = self._dictify(values, length=count)
             if self.pagination_enabled:
                 values = SmartPaginationCollection(values, count)
@@ -280,7 +283,12 @@ class CrudRestController(RestController):
                 substring_filters = self.substring_filters
 
             adapt_params_for_pagination(kw, self.pagination_enabled)
-            values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
+            try:
+                values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
+            except Exception as e:
+                flash(u'Search query was invalid: %s' % e, 'warn')
+                kw = {}
+                values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
             if self.pagination_enabled:
                 values = SmartPaginationCollection(values, self.table_filler.__count__)
         else:
