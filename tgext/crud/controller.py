@@ -286,9 +286,11 @@ class CrudRestController(RestController):
             try:
                 values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
             except Exception as e:
-                flash(u'Search query was invalid: %s' % e, 'warn')
+                flash(u'Invalid search query "%s": %s' % (request.query_string, e), 'warn')
+                # Reset all variables to sane defaults
                 kw = {}
-                values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
+                values = []
+                self.table_filler.__count__ = 0
             if self.pagination_enabled:
                 values = SmartPaginationCollection(values, self.table_filler.__count__)
         else:
