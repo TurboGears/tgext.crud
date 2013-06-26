@@ -226,10 +226,8 @@ class CrudRestController(RestController):
         self.menu_items = self._adapt_menu_items(menu_items)
         self.helpers = CrudRestControllerHelpers()
         self.provider = ProviderTypeSelector().get_selector(self.model).get_provider(self.model, hint=session)
-        
         self.session = session
 
-        self.pagination_enabled = (self.pagination and isinstance(self.table_filler, RequestLocalTableFiller))
         if self.json_dictify is True:
             self.json_dictify = {}
 
@@ -238,6 +236,9 @@ class CrudRestController(RestController):
         for type_ in check_types:
             if not hasattr(self, type_) and hasattr(self, type_+'_type'):
                 setattr(self, type_, getattr(self, type_+'_type')(self.session))
+
+        # Enable pagination only if table_filler has support for request local __count__
+        self.pagination_enabled = (self.pagination and isinstance(self.table_filler, RequestLocalTableFiller))
 
         if hasattr(self, 'new_form'):
             #register the validators since they are none from the parent class
