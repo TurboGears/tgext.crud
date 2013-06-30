@@ -191,7 +191,7 @@ class CrudRestController(RestController):
                 if isinstance(field, basestring):
                     search_fields.append((field, field, kw.get(field, False)))
                 else:
-                    search_fields.append((field[0], field[1], kw.get(field, False)))
+                    search_fields.append((field[0], field[1], kw.get(field[0], False)))
             return search_fields
         else:
             # This would be where someone explicitly disabled the search functionality
