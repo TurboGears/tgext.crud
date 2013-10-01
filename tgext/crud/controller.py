@@ -33,46 +33,82 @@ class CrudRestControllerHelpers(object):
 
 class CrudRestController(RestController):
     """
-    :variables:
+    :initialization options:
 
-    session
-      database session (drives drop-down menus
+        **session**
+              database session 
 
-    menu_items
-      Dictionary of links to other models in the form model_items[lower_model_name] = Model
+        **menu_items**
+            Dictionary or mapping type of links to other CRUD sections.
+            This is used to generate the links sidebar of the CRUD interface.
+            Can be specified in the form ``model_items['lower_model_name'] = ModelClass`` or
+            ``model_items['link'] = 'Name'``.
 
-    title
-      Title to be used for each page.  default: Turbogears Admin System
+    :class attributes:
 
-    :modifiers:
+        **title**
+            Title to be used for each page.  default: ``'Turbogears Admin System'``
 
-    model
-      Model this class is associated with
+        **model**
+            Model this class is associated with.
 
-    table
-      Widget for the table display
+        **remember_values**
+            List of model attributes that need to keep previous value when not provided
+            on submission instead of replacing the existing value with an empty one.
+            It's commonly used with file fields to avoid having to reupload the file
+            again when the model is edited.
 
-    table_filler
-      Class instance with get_value() that defines the JSon stream for the table
+        **keep_params**
+            List of URL parameters that need to be kept around when redirecting between
+            the various pages of the CRUD controller. Can be used to keep around filters
+            or sorting when editing a subset of the models.
 
-    edit_form
-      Form to be used for editing the model
+        **search_fields**
+            Enables searching on some fields, can be ``True``, ``False`` or a list
+            of fields for which searching should be enabled.
 
-    edit_filler
-      Class instance with a get_value() that defines how we get information for a single
-      existing record
+        **json_dictify**
+            ``True`` or ``False``, enables advanced dictification of retrieved models
+            when providing JSON responses. This also enables JSON encoding of related entities
+            for the returned model.
 
-    new_form
-      Form that defines how we create a form for new data entry.
+        **conditional_update_field**
+            Name of the field used to perform conditional updates when ``PUT`` method is
+            used as a REST API. ``None`` disables conditional updates (which is the default).
 
-    :Attributes:
+        **pagination**
+            Dictionary of options for pagination. ``False`` disables pagination.
+            By default ``{'items_per_page': 7}`` is provided.
+            Currently the only supported option is ``items_per_page``.
 
-      menu_items
-        Dictionary of associated Models (used for menu)
-      provider
-        sprox provider for data manipulation
-      session
-        link to the database
+        **style**
+            A ``markupsafe.Markup`` wrapped string with the CSS that needs to be used
+            for the CRUD pages.
+
+        **table**
+            The ``sprox.tablebase.TableBase`` Widget instance used to display the table.
+            By default ``tgext.crud.utils.SortableTableBase`` is used which permits to sort
+            table by columns.
+
+        **table_filler**
+            The ``sprox.fillerbase.TableFiller`` instance used to retrieve data for the table.
+            If you want to customize how data is retrieved override the 
+            ``TableFiller._do_get_provider_count_and_objs`` method to return different entities and count.
+            By default ``tgext.crud.utils.RequestLocalTableFiller`` is used which keeps
+            track of the numer of entities retrieved during the current request to enable pagination.
+
+        **edit_form**
+            Form to be used for editing an existing model. 
+            By default ``sprox.formbase.EditForm`` is used.
+
+        **edit_filler**
+            ``sprox.fillerbase.RecordFiller`` subclass used to load the values for
+            an entity that need to be edited. Override the ``RecordFiller.get_value``
+            method to provide custom values.
+
+        **new_form**
+            Form that defines how to create a new model.
+            By default ``sprox.formbase.AddRecordForm`` is used.
     """
 
     title = "Turbogears Admin System"
