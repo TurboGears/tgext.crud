@@ -14,7 +14,7 @@
     <div id="crud_leftbar">
         {% if tmpl_context.menu_items is defined %}
         <ul id="menu_items">
-            {% for lower, item in tmpl_context.menu_items.iteritems()|sort %}
+            {% for lower, item in tmpl_context.menu_items.items()|sort %}
             <li>
               <a href="{{ tmpl_context.crud_helpers.make_link(lower, value_of('pk_count', 1)) }}">{{ item }}</a>
             </li>

@@ -1,1 +1,1 @@
-from controller import CrudRestController, EasyCrudRestController
+from .controller import CrudRestController, EasyCrudRestController

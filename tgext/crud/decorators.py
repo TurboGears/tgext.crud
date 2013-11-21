@@ -7,6 +7,7 @@ from tgext.crud.validators import report_json_error
 from tgext.crud.utils import DisabledPager
 from tg.decorators import paginate
 from tg.util import Bunch
+from tgext.crud._compat import im_func, im_self, string_type
 
 try:
     import transaction
@@ -33,7 +34,7 @@ class registered_validate(tgValidate):
     >>>     
     >>>     @expose('myproject.templates.error_handler')
     >>>     def render_form(self):
-    >>>         pylons.c.form = self.form
+    >>>         tg.tg_context.form = self.form
     >>>         return
     >>>     
     >>>     @registered_validate(error_controller=render_form)
@@ -46,8 +47,8 @@ class registered_validate(tgValidate):
         self.needs_controller = True
         class Validators(object):
             def validate(self, controller, params, state):
-                func_name = controller.im_func.__name__
-                validators = controller.im_self.__validators__
+                func_name = im_func(controller).__name__
+                validators = im_self(controller).__validators__
                 if func_name in validators:
                     v = validators[func_name].validate(params)
                     return v
@@ -103,7 +104,7 @@ def catch_errors(error_types=None, error_handler=None):
         """Decorator Wrapper function"""
         try:
             value = func(self, *args, **kwargs)
-        except error_types, e:
+        except error_types as e:
             message=None
             if hasattr(e,"message"):
                 message=e.message
@@ -120,7 +121,7 @@ def catch_errors(error_types=None, error_handler=None):
                 flash(message,status="status_alert")
                 # have to get the instance that matches the error handler.  This is not a great solution, but it's 
                 # what we've got for now.
-                if isinstance(error_handler, basestring):
+                if isinstance(error_handler, string_type):
                     name = error_handler
                 else:
                     name = error_handler.__name__

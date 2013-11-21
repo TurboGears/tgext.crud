@@ -23,7 +23,8 @@ try:
 except ImportError:
     pass
 
-import urlparse, cgi, inspect
+import cgi, inspect
+from tgext.crud._compat import url_parse, string_type, unicode_text
 
 class CrudRestControllerHelpers(object):
     def make_link(self, where, pk_count=0):
@@ -192,7 +193,7 @@ class CrudRestController(RestController):
         if not request.referer:
             from_referer = {}
         else:
-            parsed = urlparse.urlparse(request.referer)
+            parsed = url_parse(request.referer)
             from_referer = dict(cgi.parse_qsl(parsed.query))
         from_referer.update(request.params)
 
@@ -205,7 +206,7 @@ class CrudRestController(RestController):
     def _adapt_menu_items(self, menu_items):
         adapted_menu_items = type(menu_items)()
 
-        for link, model in menu_items.iteritems():
+        for link, model in menu_items.items():
             if inspect.isclass(model):
                 adapted_menu_items[link + 's'] = model.__name__
             else:
@@ -224,7 +225,7 @@ class CrudRestController(RestController):
             # search_fields can be either a list of tuples with (field, name) or just a string field = name
             search_fields = []
             for field in self.search_fields:
-                if isinstance(field, basestring):
+                if isinstance(field, string_type):
                     search_fields.append((field, field, kw.get(field, False)))
                 else:
                     search_fields.append((field[0], field[1], kw.get(field[0], False)))
@@ -306,7 +307,7 @@ class CrudRestController(RestController):
             try:
                 count, values = self.table_filler._do_get_provider_count_and_objs(**kw)
             except Exception as e:
-                abort(400, detail=unicode(e))
+                abort(400, detail=unicode_text(e))
             values = self._dictify(values, length=count)
             if self.pagination_enabled:
                 values = SmartPaginationCollection(values, count)
@@ -315,7 +316,7 @@ class CrudRestController(RestController):
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
             kw.pop('substring_filters', None)
             if self.substring_filters is True:
-                substring_filters = kw.keys()
+                substring_filters = list(kw.keys())
             else:
                 substring_filters = self.substring_filters
 
@@ -323,7 +324,7 @@ class CrudRestController(RestController):
             try:
                 values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
             except Exception as e:
-                flash(u'Invalid search query "%s": %s' % (request.query_string, e), 'warn')
+                flash('Invalid search query "%s": %s' % (request.query_string, e), 'warn')
                 # Reset all variables to sane defaults
                 kw = {}
                 values = []
@@ -507,20 +508,20 @@ class EasyCrudRestController(CrudRestController):
 
         #Permit to quickly customize form options
         if hasattr(self, '__form_options__'):
-            for name, value in self.__form_options__.iteritems():
+            for name, value in self.__form_options__.items():
                 for form in (self.edit_form, self.new_form):
                     if form:
                         setattr(form, name, value)
 
         #Permit to quickly create custom actions to set values
         if hasattr(self, '__setters__'):
-            for name, config in self.__setters__.iteritems():
+            for name, config in self.__setters__.items():
                 setattr(self, name, create_setter(self, self.get_all, config))
 
 
         #Permit to quickly customize table options
         if hasattr(self, '__table_options__'):
-            for name, value in self.__table_options__.iteritems():
+            for name, value in self.__table_options__.items():
                 if name.startswith('__') and name != '__actions__':
                     for table_object in (self.table_filler, self.table):
                         if table_object:
