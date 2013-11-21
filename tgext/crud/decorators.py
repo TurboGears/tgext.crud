@@ -108,7 +108,7 @@ def catch_errors(error_types=None, error_handler=None):
             message=None
             if hasattr(e,"message"):
                 message=e.message
-            if isinstance(message,str):
+            if isinstance(message, bytes):
                 try:
                     message=message.decode('utf-8')
                 except:
