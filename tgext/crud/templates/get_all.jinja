@@ -43,7 +43,7 @@
             <form>
                 <select id="crud_search_field" onchange="crud_search_field_changed(this);">
                     {% for field, name, selected in search_fields %}
-                      {% if selected is not False %}
+                      {% if selected is not sameas false %}
                         <option value="{{ field }}" selected="selected">{{ name }}</option>
                       {% else %}
                         <option value="{{ field }}">{{ name }}</option>
