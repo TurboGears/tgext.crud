@@ -315,7 +315,7 @@ class CrudRestController(RestController):
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
             kw.pop('substring_filters', None)
             if self.substring_filters is True:
-                substring_filters = kw.keys()
+                substring_filters = set(kw.keys()) - set(['limit', 'offset', 'order_by', 'desc'])
             else:
                 substring_filters = self.substring_filters
 
