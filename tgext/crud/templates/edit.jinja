@@ -16,7 +16,7 @@
         <ul id="menu_items">
             {% for lower, item in tmpl_context.menu_items.iteritems()|sort %}
             <li>
-              <a href="{{ tmpl_context.crud_helpers.make_link(lower, value_of('pk_count', 1)) }}">{{ item }}</a>
+              <a href="{{ tmpl_context.crud_helpers.make_link(lower, pk_count or 1) }}">{{ item }}</a>
             </li>
             {% endfor %}
         </ul>
