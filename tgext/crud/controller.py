@@ -234,6 +234,9 @@ class CrudRestController(RestController):
             return []
 
     def _get_current_search(self, search_fields):
+        if not search_fields:
+            return None
+
         for field, _, value in search_fields:
             if value is not False:
                 return (field, value)
