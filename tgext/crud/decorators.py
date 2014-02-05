@@ -50,7 +50,7 @@ class registered_validate(tgValidate):
                 func_name = im_func(controller).__name__
                 validators = im_self(controller).__validators__
                 if func_name in validators:
-                    v = validators[func_name].validate(params)
+                    v = validators[func_name].validate(params, state)
                     return v
         self.validators = Validators()
 

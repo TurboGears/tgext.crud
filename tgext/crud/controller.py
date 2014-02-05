@@ -235,6 +235,9 @@ class CrudRestController(RestController):
             return []
 
     def _get_current_search(self, search_fields):
+        if not search_fields:
+            return None
+
         for field, _, value in search_fields:
             if value is not False:
                 return (field, value)
@@ -316,7 +319,7 @@ class CrudRestController(RestController):
         if not getattr(self.table.__class__, '__retrieves_own_value__', False):
             kw.pop('substring_filters', None)
             if self.substring_filters is True:
-                substring_filters = list(kw.keys())
+                substring_filters = list(set(kw.keys()) - set(['limit', 'offset', 'order_by', 'desc']))
             else:
                 substring_filters = self.substring_filters
 
