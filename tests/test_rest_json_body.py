@@ -57,7 +57,7 @@ class TestRestJsonEditCreateJsonBody(CrudTest):
         movie = result.json['value']
 
         actors = [Actor(name='James Who'), Actor(name='John Doe'), Actor(name='Man Alone')]
-        map(DBSession.add, actors)
+        list(map(DBSession.add, actors))
         DBSession.flush()
         actor_ids = [actor.actor_id for actor in actors[:2]]
         transaction.commit()

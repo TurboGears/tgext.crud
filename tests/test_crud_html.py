@@ -24,13 +24,13 @@ class TestCrudHTML(CrudTest):
     def test_post_validation(self):
         result = self.app.post('/movies/')
 
-        assert '<form action=' in result
-        assert 'Please enter a value' in result
+        assert '<form' in result, result
+        assert 'Please enter a value' in result, result
         assert DBSession.query(Movie).first() is None
 
     def test_post_validation_dberror(self):
         metadata.drop_all(tables=[Movie.__table__])
 
         result = self.app.post('/movies/', params={'title':'Movie Test'})
-        assert '<form action=' in result
-        assert '(OperationalError)' in result
+        assert '<form' in result, result
+        assert '(OperationalError)' in result, result

@@ -33,7 +33,7 @@ class TestRestJsonReadDictified(CrudTest):
         DBSession.add(genre)
 
         actors = [Actor(name='James Who'), Actor(name='John Doe'), Actor(name='Man Alone')]
-        map(DBSession.add, actors)
+        list(map(DBSession.add, actors))
 
         DBSession.add(Movie(title='First Movie', genre=genre, actors=actors[:2]))
         DBSession.add(Movie(title='Second Movie', genre=genre))

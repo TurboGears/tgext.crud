@@ -7,7 +7,7 @@ from tgext.crud.validators import report_json_error
 from tgext.crud.utils import DisabledPager
 from tg.decorators import paginate
 from tg.util import Bunch
-from tgext.crud._compat import im_func, im_self, string_type
+from tgext.crud._compat import im_func, im_self, string_type, unicode_text
 
 try:
     import transaction
@@ -105,20 +105,17 @@ def catch_errors(error_types=None, error_handler=None):
         try:
             value = func(self, *args, **kwargs)
         except error_types as e:
-            message=None
-            if hasattr(e,"message"):
-                message=e.message
-            if isinstance(message, bytes):
-                try:
-                    message=message.decode('utf-8')
-                except:
-                    message=None
+            try:
+                message = unicode_text(e)
+            except:
+                message = None
+
             if message:
                 if request.response_type == 'application/json':
                     response.status_code = 400
                     return dict(message=message)
 
-                flash(message,status="status_alert")
+                flash(message, status="status_alert")
                 # have to get the instance that matches the error handler.  This is not a great solution, but it's 
                 # what we've got for now.
                 if isinstance(error_handler, string_type):

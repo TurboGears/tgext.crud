@@ -81,7 +81,7 @@ class TestRestJsonEditCreateDelete(CrudTest):
         movie = result.json['value']
 
         actors = [Actor(name='James Who'), Actor(name='John Doe'), Actor(name='Man Alone')]
-        map(DBSession.add, actors)
+        list(map(DBSession.add, actors))
         DBSession.flush()
         actor_ids = [actor.actor_id for actor in actors[:2]]
         transaction.commit()
@@ -153,7 +153,7 @@ class TestRestJsonRead(CrudTest):
         DBSession.add(genre)
 
         actors = [Actor(name='James Who'), Actor(name='John Doe'), Actor(name='Man Alone')]
-        map(DBSession.add, actors)
+        list(map(DBSession.add, actors))
 
         DBSession.add(Movie(title='First Movie', genre=genre, actors=actors[:2]))
         DBSession.add(Movie(title='Second Movie', genre=genre))
@@ -253,7 +253,7 @@ class TestRestJsonReadDictified(CrudTest):
         DBSession.add(genre)
 
         actors = [Actor(name='James Who'), Actor(name='John Doe'), Actor(name='Man Alone')]
-        map(DBSession.add, actors)
+        list(map(DBSession.add, actors))
 
         DBSession.add(Movie(title='First Movie', genre=genre, actors=actors[:2]))
         DBSession.add(Movie(title='Second Movie', genre=genre))
@@ -367,7 +367,7 @@ class TestRestJsonEditCreateJsonBody(CrudTest):
         movie = result.json['value']
 
         actors = [Actor(name='James Who'), Actor(name='John Doe'), Actor(name='Man Alone')]
-        map(DBSession.add, actors)
+        list(map(DBSession.add, actors))
         DBSession.flush()
         actor_ids = [actor.actor_id for actor in actors[:2]]
         transaction.commit()
