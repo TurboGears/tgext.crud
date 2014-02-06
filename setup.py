@@ -10,6 +10,26 @@ try:
 except IOError:
     README = CHANGES = ''
 
+import sys
+py_version = sys.version_info[:2]
+
+test_requirements = [
+  'nose',
+  'webtest',
+  'TurboGears2',
+  'sqlalchemy',
+  'zope.sqlalchemy',
+  'transaction',
+  'tw2.core',
+  'tw2.forms'
+]
+
+if py_version == (3, 2):
+    #jinja2 2.7 is incompatible with Python 3.2
+    test_requirements.append('jinja2 < 2.7')
+else:
+    test_requirements.append('jinja2')
+
 setup(name='tgext.crud',
       version=version,
       description="Crud Controller Extension for TG2",
@@ -35,17 +55,7 @@ setup(name='tgext.crud',
           # -*- Extra requirements: -*-
       ],
       test_suite='nose.collector',
-      tests_require=[
-          'nose',
-          'webtest',
-          'TurboGears2',
-          'jinja2',
-          'sqlalchemy',
-          'zope.sqlalchemy',
-          'transaction',
-          'tw2.core',
-          'tw2.forms'
-      ],
+      tests_require=test_requirements,
       entry_points="""
       # -*- Entry points: -*-
       """,
