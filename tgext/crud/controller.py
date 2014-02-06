@@ -68,6 +68,11 @@ class CrudRestController(RestController):
             Enables searching on some fields, can be ``True``, ``False`` or a list
             of fields for which searching should be enabled.
 
+        **substring_filters**
+            Enable substring filtering for some fields, by default is disabled.
+            Pass ``True`` to enable it on all fields or pass a list of field
+            names to enable it only on some fields.
+
         **json_dictify**
             ``True`` or ``False``, enables advanced dictification of retrieved models
             when providing JSON responses. This also enables JSON encoding of related entities

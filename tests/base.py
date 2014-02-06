@@ -75,7 +75,8 @@ class FakePackage(object):
 
 class CrudTest(object):
     def setUp(self):
-        conf = AppConfig(minimal=True, root_controller=self.controller_factory())
+        self.root_controller = self.controller_factory()
+        conf = AppConfig(minimal=True, root_controller=self.root_controller)
         conf.package = FakePackage()
         conf.model = conf.package.model
         conf.use_dotted_templatenames = True
