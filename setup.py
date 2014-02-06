@@ -21,7 +21,8 @@ test_requirements = [
   'zope.sqlalchemy',
   'transaction',
   'tw2.core',
-  'tw2.forms'
+  'tw2.forms',
+  'mako'
 ]
 
 if py_version == (3, 2):
