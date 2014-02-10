@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.6.6'
+version = '0.7.0'
 
 here = os.path.abspath(os.path.dirname(__file__))
 try:
@@ -52,7 +52,7 @@ setup(name='tgext.crud',
       zip_safe=True,
       install_requires=[
           "TurboGears2 >= 2.2.0",
-          'sprox>=0.8.3',
+          'sprox>=0.9.0',
           # -*- Extra requirements: -*-
       ],
       test_suite='nose.collector',
