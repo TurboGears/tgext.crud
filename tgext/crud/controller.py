@@ -14,7 +14,7 @@ from sprox.providerselector import ProviderTypeSelector
 from sprox.fillerbase import TableFiller
 from sprox.formbase import AddRecordForm, EditableForm
 from sprox.fillerbase import RecordFiller, AddFormFiller
-from markupsafe import Markup
+from .resources import CSSSource, crud_style, crud_script
 
 errors = ()
 try:
@@ -87,9 +87,10 @@ class CrudRestController(RestController):
             By default ``{'items_per_page': 7}`` is provided.
             Currently the only supported option is ``items_per_page``.
 
-        **style**
-            A ``markupsafe.Markup`` wrapped string with the CSS that needs to be used
-            for the CRUD pages.
+        **resources**
+            A list of CSSSource / JSSource that have to be injected inside CRUD
+            pages when rendering. By default ``tgext.crud.resources.crud_style`` and
+            ``tgext.crud.resources.crud_script`` are injected.
 
         **table**
             The ``sprox.tablebase.TableBase`` Widget instance used to display the table.
@@ -125,57 +126,17 @@ class CrudRestController(RestController):
     json_dictify = False # True is slower but provides relations
     conditional_update_field = None
     pagination = {'items_per_page': 7}
-    style = Markup('''
-#menu_items {
-  padding:0px 12px 0px 2px;
-  list-style-type:None;
-  padding-left:0px;
-}
-
-#crud_leftbar {
-    float:left;
-    padding-left:0px;
-}
-
-#crud_content {
-    float:left;
-    width:80%;
-}
-
-#crud_content > h1,
-.crud_edit > h2,
-.crud_add > h2 {
-    margin-top: 1px;
-}
-
-#crud_btn_new {
-    margin:1ex 0;
-}
-
-#crud_btn_new > span {
-    margin-left:2em;
-}
-
-#crud_search {
-    float: right;
-}
-
-#crud_search input {
-    border: 1px solid #CCC;
-    background-color: white;
-}
-
-#crud_search input:hover {
-    background-color: #EFEFEF;
-}
-''')
+    resources = ( crud_style,
+                  crud_script )
 
     def _before(self, *args, **kw):
         tmpl_context.title = self.title
         tmpl_context.menu_items = self.menu_items
         tmpl_context.kept_params = self._kept_params()
         tmpl_context.crud_helpers = self.helpers
-        tmpl_context.crud_style = self.style
+
+        for resource in self.resources:
+            resource.inject()
 
     __before__ = _before #This can be removed since 2.2
 
@@ -266,8 +227,12 @@ class CrudRestController(RestController):
             return _dictify(value)
 
     def __init__(self, session, menu_items=None):
+        if hasattr(self, 'style'):
+            raise AttributeError('style attribute is not supported anymore, resources attribute replaces it')
+
         if menu_items is None:
             menu_items = {}
+
         self.menu_items = self._adapt_menu_items(menu_items)
         self.helpers = CrudRestControllerHelpers()
         self.provider = ProviderTypeSelector().get_selector(self.model).get_provider(self.model, hint=session)

@@ -5,20 +5,6 @@
 {% endblock %}
 
 {% block master_head %}
-<style>
-    {{ tmpl_context.crud_style|safe }}
-</style>
-<script>
-    function crud_search_field_changed(select) {
-        var selected = '';
-        for (var idx=0; idx != select.options.length; ++idx) {
-            if (select.options[idx].selected)
-                selected = select.options[idx];
-        }
-        var field = document.getElementById('crud_search_value');
-        field.name = selected.value;
-    }
-</script>
 {% endblock %}
 
 {% block contents %}

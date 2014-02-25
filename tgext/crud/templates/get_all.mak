@@ -6,17 +6,6 @@ ${tmpl_context.title} - ${model} Listing
 </%def>
 <%def name="meta()">
 ${menu_items.menu_style()}
-<script>
-    function crud_search_field_changed(select) {
-        var selected = '';
-        for (var idx=0; idx != select.options.length; ++idx) {
-            if (select.options[idx].selected)
-                selected = select.options[idx];
-        }
-        var field = document.getElementById('crud_search_value');
-        field.name = selected.value;
-    }
-</script>
 ${parent.meta()}
 </%def>
 <%def name="body_class()">tundra</%def>

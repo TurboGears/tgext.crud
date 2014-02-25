@@ -4,20 +4,6 @@
   <xi:include href="master.html" />
 <head>
     <title>${tmpl_context.title} - ${model} Listing</title>
-    <style>
-        ${Markup(tmpl_context.crud_style)}
-    </style>
-    <script>
-        function crud_search_field_changed(select) {
-            var selected = '';
-            for (var idx=0; idx != select.options.length; ++idx) {
-                if (select.options[idx].selected)
-                    selected = select.options[idx];
-            }
-            var field = document.getElementById('crud_search_value');
-            field.name = selected.value;
-        }
-    </script>
 </head>
 <body class="tundra">
     <div id="crud_leftbar">

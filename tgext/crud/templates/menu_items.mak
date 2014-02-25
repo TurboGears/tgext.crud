@@ -1,7 +1,4 @@
 <%def name="menu_style()">
-<style>
-    ${tmpl_context.crud_style}
-</style>
 </%def>
 
 <%def name="menu_items(pk_count=0)">
