@@ -11,10 +11,10 @@ from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller
                               set_table_filler_getter, SortableTableBase, map_args_to_pks,
                               adapt_params_for_pagination, allow_json_parameters)
 from sprox.providerselector import ProviderTypeSelector
-from sprox.fillerbase import TableFiller
 from sprox.formbase import AddRecordForm, EditableForm
 from sprox.fillerbase import RecordFiller, AddFormFiller
 from .resources import CSSSource, crud_style, crud_script
+import warnings
 
 errors = ()
 try:
@@ -228,7 +228,12 @@ class CrudRestController(RestController):
 
     def __init__(self, session, menu_items=None):
         if hasattr(self, 'style'):
-            raise AttributeError('style attribute is not supported anymore, resources attribute replaces it')
+            warnings.warn('style attribute is not supported anymore, '
+                          'resources attribute replaces it', DeprecationWarning,
+                          stacklevel=2)
+            self.resources = (crud_script,
+                              CSSSource(location='headbottom',
+                                        src=self.style))
 
         if menu_items is None:
             menu_items = {}
