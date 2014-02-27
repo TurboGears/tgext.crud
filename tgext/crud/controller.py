@@ -452,32 +452,32 @@ class CrudRestController(RestController):
 
 class EasyCrudRestController(CrudRestController):
     def __init__(self, session, menu_items=None):
-        if not hasattr(self, 'table'):
+        if not (hasattr(self, 'table') or hasattr(self, 'table_type')):
             class Table(SortableTableBase):
                 __entity__=self.model
             self.table = Table(session)
 
-        if not hasattr(self, 'table_filler'):
+        if not (hasattr(self, 'table_filler') or hasattr(self, 'table_filler_type')):
             class MyTableFiller(RequestLocalTableFiller):
                 __entity__ = self.model
             self.table_filler = MyTableFiller(session)
 
-        if not hasattr(self, 'edit_form'):
+        if not (hasattr(self, 'edit_form') or hasattr(self, 'edit_form_type')):
             class EditForm(EditableForm):
                 __entity__ = self.model
             self.edit_form = EditForm(session)
 
-        if not hasattr(self, 'edit_filler'):
+        if not (hasattr(self, 'edit_filler') or hasattr(self, 'edit_filler_type')):
             class EditFiller(RecordFiller):
                 __entity__ = self.model
             self.edit_filler = EditFiller(session)
 
-        if not hasattr(self, 'new_form'):
+        if not (hasattr(self, 'new_form') or hasattr(self, 'new_form_type')):
             class NewForm(AddRecordForm):
                 __entity__ = self.model
             self.new_form = NewForm(session)
 
-        if not hasattr(self, 'new_filler'):
+        if not (hasattr(self, 'new_filler') or hasattr(self, 'new_filler_type')):
             class NewFiller(AddFormFiller):
                 __entity__ = self.model
             self.new_filler = NewFiller(session)
