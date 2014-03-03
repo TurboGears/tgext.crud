@@ -80,7 +80,7 @@ class CrudTest(object):
         conf.package = FakePackage()
         conf.model = conf.package.model
         conf.use_dotted_templatenames = True
-        conf.renderers = ['json', 'jinja']
+        conf.renderers = ['json', 'jinja', 'mako']
         conf.default_renderer = 'jinja'
         conf.use_sqlalchemy = True
         conf.paths = {'controllers':'tests',
