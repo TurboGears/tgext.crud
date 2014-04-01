@@ -14,12 +14,12 @@ class EntityValidator(FancyValidator):
         self.provider = provider
         self.primary_field = self.provider.get_primary_field(self.model)
 
-    def _to_python(self, value, state):
+    def _convert_to_python(self, value, state):
         try:
             return self.provider.get_obj(self.model, {self.primary_field:value})
         except:
             return None
 
-    def validate_python(self, value, state):
+    def _validate_python(self, value, state):
         if not value:
             raise Invalid('object not found', value, state)
