@@ -169,3 +169,7 @@ def adapt_params_for_pagination(params, pagination_enabled=True):
 def allow_json_parameters(remainder, params):
     if request.content_type == 'application/json':
         params.update(request.json_body)
+
+def force_response_type(response_type):
+    if response_type is not None:
+        request._response_type = response_type

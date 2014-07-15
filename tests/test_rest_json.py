@@ -10,6 +10,7 @@ class TestRestJsonEditCreateDelete(CrudTest):
 
     def controller_factory(self):
         class MovieController(EasyCrudRestController):
+            response_type = 'application/json'
             model = Movie
 
         class RestJsonController(TGController):
@@ -18,7 +19,7 @@ class TestRestJsonEditCreateDelete(CrudTest):
         return RestJsonController()
 
     def test_post(self):
-        result = self.app.post('/movies.json', params={'title':'Movie Test'})
+        result = self.app.post('/movies', params={'title':'Movie Test'})
 
         movie = DBSession.query(Movie).first()
         assert movie is not None, result
@@ -26,7 +27,7 @@ class TestRestJsonEditCreateDelete(CrudTest):
         assert movie.movie_id == result.json['value']['movie_id']
 
     def test_post_validation(self):
-        result = self.app.post('/movies.json', status=400)
+        result = self.app.post('/movies', status=400)
         assert result.json['title'] is not None #there is an error for required title
         assert result.json['description'] is None #there isn't any error for optional description
 
@@ -35,22 +36,22 @@ class TestRestJsonEditCreateDelete(CrudTest):
     def test_post_validation_dberror(self):
         metadata.drop_all(tables=[Movie.__table__])
 
-        result = self.app.post('/movies.json', params={'title':'Movie Test'}, status=400)
+        result = self.app.post('/movies', params={'title':'Movie Test'}, status=400)
         assert result.json['message'].startswith('(OperationalError)')
 
     def test_put(self):
-        result = self.app.post('/movies.json', params={'title':'Movie Test'})
+        result = self.app.post('/movies', params={'title':'Movie Test'})
         movie = result.json['value']
 
-        result = self.app.put('/movies/%s.json' % movie['movie_id'],
+        result = self.app.put('/movies/%s' % movie['movie_id'],
                               params={'title':'New Title'})
         assert result.json['value']['title'] == 'New Title'
 
     def test_put_validation(self):
-        result = self.app.post('/movies.json', params={'title':'Movie Test'})
+        result = self.app.post('/movies', params={'title':'Movie Test'})
         movie = result.json['value']
 
-        result = self.app.put('/movies/%s.json' % movie['movie_id'],
+        result = self.app.put('/movies/%s' % movie['movie_id'],
                               params={'title':''}, status=400)
         assert result.json['title'] is not None #there is an error for required title
         assert result.json['description'] is None #there isn't any error for optional description
@@ -59,11 +60,11 @@ class TestRestJsonEditCreateDelete(CrudTest):
         assert movie.title == 'Movie Test'
 
     def test_put_missing(self):
-        result = self.app.post('/movies.json', params={'title':'Movie Test'})
+        result = self.app.post('/movies', params={'title':'Movie Test'})
         movie = result.json['value']
         movie_id = movie['movie_id'] + 100
 
-        result = self.app.put('/movies/%s.json' % movie_id, status=404,
+        result = self.app.put('/movies/%s' % movie_id, status=404,
                               params={'title':'New Title'})
         result = result.json
         assert result['value'] is None
@@ -71,13 +72,13 @@ class TestRestJsonEditCreateDelete(CrudTest):
     def test_put_invalid(self):
         movie_id = 'A'
 
-        result = self.app.put('/movies/%s.json' % movie_id, status=400,
+        result = self.app.put('/movies/%s' % movie_id, status=400,
                               params={'title':'New Title'})
         result = result.json
         assert result['movie_id'] != None
 
     def test_put_relationship(self):
-        result = self.app.post('/movies.json', params={'title':'Movie Test'})
+        result = self.app.post('/movies', params={'title':'Movie Test'})
         movie = result.json['value']
 
         actors = [Actor(name='James Who'), Actor(name='John Doe'), Actor(name='Man Alone')]
@@ -86,7 +87,7 @@ class TestRestJsonEditCreateDelete(CrudTest):
         actor_ids = [actor.actor_id for actor in actors[:2]]
         transaction.commit()
 
-        result = self.app.put('/movies/%s.json' % movie['movie_id'],
+        result = self.app.put('/movies/%s' % movie['movie_id'],
                               params={'title':'Movie Test',
                                       'actors':actor_ids})
         assert len(result.json['value']['actors']) == 2, result

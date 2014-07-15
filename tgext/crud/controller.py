@@ -9,7 +9,8 @@ from tgext.crud.decorators import (registered_validate, register_validators, cat
                                    optional_paginate)
 from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller, create_setter,
                               set_table_filler_getter, SortableTableBase, map_args_to_pks,
-                              adapt_params_for_pagination, allow_json_parameters)
+                              adapt_params_for_pagination, allow_json_parameters, 
+                              force_response_type)
 from sprox.providerselector import ProviderTypeSelector
 from sprox.formbase import AddRecordForm, EditableForm
 from sprox.fillerbase import RecordFiller, AddFormFiller
@@ -87,6 +88,13 @@ class CrudRestController(RestController):
             By default ``{'items_per_page': 7}`` is provided.
             Currently the only supported option is ``items_per_page``.
 
+        **response_type**
+            Limit response to a single format, can be: 'application/json' or 'text/html'. 
+            By default tgext.crud will detect expected response from Accept header and 
+            will provide response content according to the expected one. If you want
+            to avoid HTML access to a plain JSON API you can use this option to limit
+            valid responses to application/json.
+
         **resources**
             A list of CSSSource / JSSource that have to be injected inside CRUD
             pages when rendering. By default ``tgext.crud.resources.crud_style`` and
@@ -125,6 +133,7 @@ class CrudRestController(RestController):
     search_fields = True  # True for automagic
     json_dictify = False # True is slower but provides relations
     conditional_update_field = None
+    response_type = None
     pagination = {'items_per_page': 7}
     resources = ( crud_style,
                   crud_script )
@@ -137,6 +146,8 @@ class CrudRestController(RestController):
 
         for resource in self.resources:
             resource.inject()
+
+        force_response_type(self.response_type)
 
     __before__ = _before #This can be removed since 2.2
 
