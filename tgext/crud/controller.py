@@ -125,7 +125,7 @@ class CrudRestController(RestController):
             Form that defines how to create a new model.
             By default ``sprox.formbase.AddRecordForm`` is used.
     """
-
+    __provider_type_selector_type__ = ProviderTypeSelector
     title = "Turbogears Admin System"
     keep_params = None
     remember_values = []
@@ -251,7 +251,7 @@ class CrudRestController(RestController):
 
         self.menu_items = self._adapt_menu_items(menu_items)
         self.helpers = CrudRestControllerHelpers()
-        self.provider = ProviderTypeSelector().get_selector(self.model).get_provider(self.model, hint=session)
+        self.provider = self.__provider_type_selector_type__().get_selector(self.model).get_provider(self.model, hint=session)
         self.session = session
 
         if self.json_dictify is True:
