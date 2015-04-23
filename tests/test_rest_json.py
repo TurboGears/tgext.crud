@@ -37,7 +37,7 @@ class TestRestJsonEditCreateDelete(CrudTest):
         metadata.drop_all(tables=[Movie.__table__])
 
         result = self.app.post('/movies', params={'title':'Movie Test'}, status=400)
-        assert result.json['message'].startswith('(OperationalError)')
+        assert result.json['message'].startswith('(sqlite3.OperationalError)'), result
 
     def test_put(self):
         result = self.app.post('/movies', params={'title':'Movie Test'})
