@@ -94,6 +94,13 @@ class CrudRestController(RestController):
             will provide response content according to the expected one. If you want
             to avoid HTML access to a plain JSON API you can use this option to limit
             valid responses to application/json.
+            
+        **provider_type_selector_type**
+            Use a custom provider type selector class.
+            By default the ``sprox.providerselector.ProviderTypeSelector`` class will
+            be used to instantiate a provider selector that can select the right provider
+            for ming and sqlalchemy. In case you are not using ming or sqlalchemy or you just
+            want to change the default behavior of the provider selector, you can override this.
 
         **resources**
             A list of CSSSource / JSSource that have to be injected inside CRUD
@@ -125,7 +132,6 @@ class CrudRestController(RestController):
             Form that defines how to create a new model.
             By default ``sprox.formbase.AddRecordForm`` is used.
     """
-    __provider_type_selector_type__ = ProviderTypeSelector
     title = "Turbogears Admin System"
     keep_params = None
     remember_values = []
@@ -134,6 +140,7 @@ class CrudRestController(RestController):
     json_dictify = False # True is slower but provides relations
     conditional_update_field = None
     response_type = None
+    provider_type_selector_type = ProviderTypeSelector
     pagination = {'items_per_page': 7}
     resources = ( crud_style,
                   crud_script )
@@ -251,7 +258,7 @@ class CrudRestController(RestController):
 
         self.menu_items = self._adapt_menu_items(menu_items)
         self.helpers = CrudRestControllerHelpers()
-        self.provider = self.__provider_type_selector_type__().get_selector(self.model).get_provider(self.model, hint=session)
+        self.provider = self.provider_type_selector_type().get_selector(self.model).get_provider(self.model, hint=session)
         self.session = session
 
         if self.json_dictify is True:
