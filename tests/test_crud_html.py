@@ -34,7 +34,8 @@ class TestCrudHTML(CrudTest):
 
         result = self.app.post('/movies/', params={'title':'Movie Test'})
         assert '<form' in result, result
-        assert '(OperationalError)' in result, result
+        assert 'no such table: movies' in result, result
+        assert 'status_alert' in result, result
 
     def test_search(self):
         result = self.app.get('/movies/')

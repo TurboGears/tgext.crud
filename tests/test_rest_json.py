@@ -37,7 +37,7 @@ class TestRestJsonEditCreateDelete(CrudTest):
         metadata.drop_all(tables=[Movie.__table__])
 
         result = self.app.post('/movies', params={'title':'Movie Test'}, status=400)
-        assert result.json['message'].startswith('(OperationalError)')
+        assert 'no such table: movies' in result.json['message'], result.text
 
     def test_put(self):
         result = self.app.post('/movies', params={'title':'Movie Test'})
