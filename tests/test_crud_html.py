@@ -34,7 +34,7 @@ class TestCrudHTML(CrudTest):
 
         result = self.app.post('/movies/', params={'title':'Movie Test'})
         assert '<form' in result, result
-        assert '(OperationalError)' in result, result
+        assert '(sqlite3.OperationalError)' in result, result
 
     def test_search(self):
         result = self.app.get('/movies/')
