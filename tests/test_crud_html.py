@@ -99,15 +99,7 @@ class TestCrudHTMLSearch(CrudTest):
         assert 'Third Movie' in result
         assert 'Fourth Movie' not in result
 
-    def test_search_relation_by_id(self):
-        result = self.app.get('/movies/?actors=1')
-        assert 'First Movie' in result
-        assert 'Second Movie' not in result
-
-    """
-    def test_search_relation_by_text(self):
-        result = self.app.get('/movies/?genre=action')
-        assert 'First Movie' in result
-        assert 'Second Movie' in result
-        assert 'Fifth Movie' not in result
-    """
+    def test_search_relation(self):
+        result = self.app.get('/movies/?actors=James%20Who')
+        assert 'First Movie' in result, result
+        assert 'Second Movie' not in result, result
