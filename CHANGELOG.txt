@@ -1,3 +1,6 @@
+0.7.4
+* Allow custom provider selector
+
 0.5.6
 -----------------------
 * Make possible to choose whenever to rollback session or abort transaction when a database error occurs using the tgext.crud.abort_transactions option
