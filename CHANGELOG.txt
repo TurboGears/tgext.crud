@@ -1,4 +1,13 @@
+0.8.0
+-----
+
+* get_all now logs exception when unable to retrieve data
+* post, put and delete now return the created/edited/deleted object when called from child class method
+* When subclassed error handler are now properly retrieved from the subclass when overridden.
+* post, put and delete now redirect after the controller has been executed, not during.
+
 0.7.4
+-----
 * Allow custom provider selector
 
 0.5.6

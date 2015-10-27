@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.7.4'
+version = '0.8.0'
 
 here = os.path.abspath(os.path.dirname(__file__))
 try:
     README = open(os.path.join(here, 'README.txt')).read()
-    CHANGES = open(os.path.join(here, 'docs/HISTORY.txt')).read()
+    CHANGES = open(os.path.join(here, 'CHANGELOG.txt')).read()
 except IOError:
     README = CHANGES = ''
 
@@ -26,7 +26,7 @@ test_requirements = [
 ]
 
 if py_version == (3, 2):
-    #jinja2 2.7 is incompatible with Python 3.2
+    # jinja2 2.7 is incompatible with Python 3.2
     test_requirements.append('jinja2 < 2.7')
 else:
     test_requirements.append('jinja2')
@@ -51,9 +51,8 @@ setup(name='tgext.crud',
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-          "TurboGears2 >= 2.2.0",
-          'sprox>=0.9.0',
-          # -*- Extra requirements: -*-
+          "TurboGears2 >= 2.3.0",
+          'sprox >= 0.9.0',
       ],
       test_suite='nose.collector',
       tests_require=test_requirements,
