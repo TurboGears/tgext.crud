@@ -173,3 +173,8 @@ def allow_json_parameters(remainder, params):
 def force_response_type(response_type):
     if response_type is not None:
         request._response_type = response_type
+
+def redirect_on_completion(remainder, params, output):
+    redirection = output.get('redirect')
+    if redirection is not None:
+        redirect(**redirection)

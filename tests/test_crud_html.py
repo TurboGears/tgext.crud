@@ -1,4 +1,4 @@
-from tg import TGController
+from tg import TGController, expose, tmpl_context
 import transaction
 from tgext.crud import EasyCrudRestController
 from .base import CrudTest, Movie, DBSession, metadata, Actor, Genre
@@ -8,6 +8,12 @@ class TestCrudHTML(CrudTest):
     def controller_factory(self):
         class MovieController(EasyCrudRestController):
             model = Movie
+
+            @expose(inherit=True)
+            def post(self, *args, **kw):
+                resp = super(MovieController, self).post(*args, **kw)
+                tmpl_context.obj = resp['obj']
+                return resp
 
         class CrudHTMLController(TGController):
             movies = MovieController(DBSession)
@@ -36,6 +42,14 @@ class TestCrudHTML(CrudTest):
         assert '<form' in result, result
         assert 'no such table: movies' in result, result
         assert 'status_alert' in result, result
+
+    def test_post_object_accessible(self):
+        result = self.app.post('/movies/', params={'title': 'Movie Test'})
+        tmpl_c = result.request.environ['paste.testing_variables']['tmpl_context']
+
+        created_object = DBSession.merge(tmpl_c.obj, load=False)
+        movie = DBSession.query(Movie).first()
+        assert created_object.movie_id == movie.movie_id, created_object
 
     def test_search(self):
         result = self.app.get('/movies/')

@@ -1,8 +1,9 @@
 """
 """
+import logging
 import tg
 from tg import expose, flash, redirect, tmpl_context, request, abort
-from tg.decorators import without_trailing_slash, with_trailing_slash, before_validate
+from tg.decorators import without_trailing_slash, with_trailing_slash, before_validate, before_render
 from tg.controllers import RestController
 
 from tgext.crud.decorators import (registered_validate, register_validators, catch_errors,
@@ -10,7 +11,7 @@ from tgext.crud.decorators import (registered_validate, register_validators, cat
 from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller, create_setter,
                               set_table_filler_getter, SortableTableBase, map_args_to_pks,
                               adapt_params_for_pagination, allow_json_parameters, 
-                              force_response_type)
+                              force_response_type, redirect_on_completion)
 from sprox.providerselector import ProviderTypeSelector
 from sprox.formbase import AddRecordForm, EditableForm
 from sprox.fillerbase import RecordFiller, AddFormFiller
@@ -26,6 +27,8 @@ except ImportError:
 
 import cgi, inspect
 from tgext.crud._compat import url_parse, string_type, unicode_text
+
+log = logging.getLogger('tgext.crud')
 
 class CrudRestControllerHelpers(object):
     def make_link(self, where, pk_count=0):
@@ -273,8 +276,8 @@ class CrudRestController(RestController):
         # Enable pagination only if table_filler has support for request local __count__
         self.pagination_enabled = (self.pagination and isinstance(self.table_filler, RequestLocalTableFiller))
 
+        # Register forms that need to be validated for each action.
         if hasattr(self, 'new_form'):
-            #register the validators since they are none from the parent class
             register_validators(self, 'post', self.new_form)
         if hasattr(self, 'edit_form'):
             register_validators(self, 'put', self.edit_form)
@@ -303,6 +306,7 @@ class CrudRestController(RestController):
             try:
                 count, values = self.table_filler._do_get_provider_count_and_objs(**kw)
             except Exception as e:
+                log.exception('Failed to retrieve table data')
                 abort(400, detail=unicode_text(e))
             values = self._dictify(values, length=count)
             if self.pagination_enabled:
@@ -320,7 +324,8 @@ class CrudRestController(RestController):
             try:
                 values = self.table_filler.get_value(substring_filters=substring_filters, **kw)
             except Exception as e:
-                flash('Invalid search query "%s": %s' % (request.query_string, e), 'warn')
+                log.exception('Failed to retrieve table data')
+                flash('Unable to retrieve data (Filter "%s": %s)' % (request.query_string, e), 'warn')
                 # Reset all variables to sane defaults
                 kw = {}
                 values = []
@@ -366,13 +371,13 @@ class CrudRestController(RestController):
     @expose('jinja:tgext.crud.templates.edit')
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
-        pks = self.provider.get_primary_fields(self.model)
         kw = map_args_to_pks(args, {})
 
         tmpl_context.widget = self.edit_form
         value = self.edit_filler.get_value(kw)
         value['_method'] = 'PUT'
-        return dict(value=value, model=self.model.__name__, pk_count=len(pks))
+        return dict(value=value, model=self.model.__name__,
+                    pk_count=len(self.provider.get_primary_fields(self.model)))
 
     @without_trailing_slash
     @expose('genshi:tgext.crud.templates.new')
@@ -386,8 +391,9 @@ class CrudRestController(RestController):
     @expose(content_type='text/html')
     @expose('json:', content_type='application/json')
     @before_validate(allow_json_parameters)
-    @catch_errors(errors, error_handler=new)
-    @registered_validate(error_handler=new)
+    @before_render(redirect_on_completion)
+    @registered_validate(error_handler='new')
+    @catch_errors(errors, error_handler='new')
     def post(self, *args, **kw):
         obj = self.provider.create(self.model, params=kw)
 
@@ -398,14 +404,16 @@ class CrudRestController(RestController):
             return dict(model=self.model.__name__,
                         value=self._dictify(obj))
 
-        return redirect('./', params=self._kept_params())
+        return dict(obj=obj,
+                    redirect=dict(base_url='./', params=self._kept_params()))
 
     @expose(content_type='text/html')
     @expose('json:', content_type='application/json')
     @before_validate(allow_json_parameters)
     @before_validate(map_args_to_pks)
-    @registered_validate(error_handler=edit)
-    @catch_errors(errors, error_handler=edit)
+    @before_render(redirect_on_completion)
+    @registered_validate(error_handler='edit')
+    @catch_errors(errors, error_handler='edit')
     def put(self, *args, **kw):
         """update"""
         omit_fields = []
@@ -441,10 +449,12 @@ class CrudRestController(RestController):
                         value=self._dictify(obj))
 
         pks = self.provider.get_primary_fields(self.model)
-        return redirect('../' * len(pks), params=self._kept_params())
+        return dict(obj=obj,
+                    redirect=dict(base_url='../' * len(pks), params=self._kept_params()))
 
     @expose(content_type='text/html')
     @expose('json:', content_type='application/json')
+    @before_render(redirect_on_completion)
     def post_delete(self, *args, **kw):
         """This is the code that actually deletes the record"""
         kw = map_args_to_pks(args, {})
@@ -460,7 +470,9 @@ class CrudRestController(RestController):
             return dict()
 
         pks = self.provider.get_primary_fields(self.model)
-        return redirect('./' + '../' * (len(pks) - 1), params=self._kept_params())
+        return dict(obj=obj,
+                    redirect=dict(base_url='./' + '../' * (len(pks) - 1),
+                                  params=self._kept_params()))
 
     @expose('genshi:tgext.crud.templates.get_delete')
     @expose('jinja:tgext.crud.templates.get_delete')

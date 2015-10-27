@@ -7,6 +7,7 @@ from tgext.crud.validators import report_json_error
 from tgext.crud.utils import DisabledPager
 from tg.decorators import paginate
 from tg.util import Bunch
+from tg.exceptions import HTTPOk
 from tgext.crud._compat import im_func, im_self, string_type, unicode_text
 
 try:
@@ -43,6 +44,9 @@ class registered_validate(tgValidate):
     >>>         raise Exception
     """
     def __init__(self, error_handler=None, *args,**kw):
+        if not isinstance(error_handler, string_type):
+            raise ValueError('error_handle must be a string containing method name.')
+
         self._error_handler = error_handler
         self.needs_controller = True
         class Validators(object):
@@ -64,7 +68,10 @@ class registered_validate(tgValidate):
         if response_type == 'application/json':
             return report_json_error
         else:
-            return self._error_handler
+            # Get method named as the error handler from current controller.
+            controller = request.controller_state.controller
+            action = getattr(controller, self._error_handler)
+            return getattr(action, '__func__', getattr(action, 'im_func', action))
 
         
 def register_validators(controller, name, validators):
@@ -93,51 +100,45 @@ def catch_errors(error_types=None, error_handler=None):
     >>> class MyController(TGController):
     >>>     @expose('myproject.templates.error_handler')
     >>>     def error_handler(self):
-    >>>     return
+    >>>         return
     >>>     
-    >>>     @catch_errors(Exception, error_handler=error_handler)
+    >>>     @catch_errors(Exception, error_handler='error_handler')
     >>>     @expose()
     >>>     def method_with_exception(self):
     >>>         raise Exception
     """
+    if not isinstance(error_handler, string_type):
+        raise ValueError('error_handle must be a string containing method name.')
+
     def wrapper(func, self, *args, **kwargs):
         """Decorator Wrapper function"""
         try:
-            value = func(self, *args, **kwargs)
+            return func(self, *args, **kwargs)
         except error_types as e:
             try:
                 message = unicode_text(e)
             except:
-                message = None
+                message = 'Unknown Error'
 
-            if message:
-                if request.response_type == 'application/json':
-                    response.status_code = 400
-                    return dict(message=message)
+            if request.response_type == 'application/json':
+                response.status_code = 400
+                return dict(message=message)
 
-                flash(message, status="status_alert")
-                # have to get the instance that matches the error handler.  This is not a great solution, but it's 
-                # what we've got for now.
-                if isinstance(error_handler, string_type):
-                    name = error_handler
+            if isinstance(e, sqla_errors):
+                #if the error is a sqlalchemy error suppose we need to rollback the transaction
+                #so that the error handler can perform queries.
+                if transaction is not None and config.get('tgext.crud.abort_transactions', False):
+                    #This is in case we need to support multiple databases or two phase commit.
+                    transaction.abort()
                 else:
-                    name = error_handler.__name__
-                func = getattr(self, name)
-                remainder = []
-                remainder.extend(args)
+                    self.session.rollback()
 
-                if isinstance(e, sqla_errors):
-                    #if the error is a sqlalchemy error suppose we need to rollback the transaction
-                    #so that the error handler can perform queries.
-                    if transaction is not None and config.get('tgext.crud.abort_transactions', False):
-                        #This is in case we need to support multiple databases or two phase commit.
-                        transaction.abort()
-                    else:
-                        self.session.rollback()
+            flash(message, status="status_alert")
 
-                return self._call(func, params=kwargs, remainder=remainder)
-
-        return value
+            # Get the instance that matches the error handler.
+            # This is not a great solution, but it's what we've got for now.
+            func = getattr(self, error_handler)
+            raise HTTPOk(body=self._call(func, params=kwargs, remainder=list(args)))
     return decorator(wrapper)
 
 
