@@ -8,7 +8,7 @@ from tg.controllers import RestController
 
 from tgext.crud.decorators import (registered_validate, register_validators, catch_errors,
                                    optional_paginate)
-from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller, create_setter,
+from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller,
                               set_table_filler_getter, SortableTableBase, map_args_to_pks,
                               adapt_params_for_pagination, allow_json_parameters, 
                               force_response_type, redirect_on_completion)
@@ -481,6 +481,19 @@ class CrudRestController(RestController):
         return dict(args=args)
 
 class EasyCrudRestController(CrudRestController):
+    """A CrudRestController that provides a quick way to setup Sprox forms and Table.
+
+    Form options are available through the ``__form_options__`` dictionary which
+    can contain any option accepted by sprox :class:`FormBase`. Options specific to
+    *NewForm* and *EditForm*  can be provided through ``__form_new_options__`` and
+    ``__form_edit_options__``.
+
+    Table options are available through the ``__table_options__`` dictionary which
+    can contain any option accepted by sprox :class:`TableBase`. Dictionary keys
+    that do not start with **__** will be threated as :class:`TableFiller` attributes
+    apart from ``__actions__`` which is always assigned to the :class:`TableFiller`.
+
+    """
     def __init__(self, session, menu_items=None):
         if not (hasattr(self, 'table') or hasattr(self, 'table_type')):
             class Table(SortableTableBase):
@@ -514,20 +527,27 @@ class EasyCrudRestController(CrudRestController):
         
         super(EasyCrudRestController, self).__init__(session, menu_items)
 
-        #Permit to quickly customize form options
+        # Permit to quickly customize form options
         if hasattr(self, '__form_options__'):
             for name, value in self.__form_options__.items():
                 for form in (self.edit_form, self.new_form):
                     if form:
                         setattr(form, name, value)
 
-        #Permit to quickly create custom actions to set values
+        if hasattr(self, '__form_new_options__'):
+            for name, value in self.__form_new_options__.items():
+                if self.new_form:
+                    setattr(self.new_form, name, value)
+
+        if hasattr(self, '__form_edit_options__'):
+            for name, value in self.__form_edit_options__.items():
+                if self.edit_form:
+                    setattr(self.edit_form, name, value)
+
         if hasattr(self, '__setters__'):
-            for name, config in self.__setters__.items():
-                setattr(self, name, create_setter(self, self.get_all, config))
+            raise ValueError('__setters__ are deprecated and no longer supported.')
 
-
-        #Permit to quickly customize table options
+        # Permit to quickly customize table options
         if hasattr(self, '__table_options__'):
             for name, value in self.__table_options__.items():
                 if name.startswith('__') and name != '__actions__':
