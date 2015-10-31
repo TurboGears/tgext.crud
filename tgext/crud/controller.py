@@ -529,9 +529,9 @@ class EasyCrudRestController(CrudRestController):
 
         # Permit to quickly customize form options
         if hasattr(self, '__form_options__'):
-            for name, value in self.__form_options__.items():
-                for form in (self.edit_form, self.new_form):
-                    if form:
+            for form in (self.edit_form, self.new_form):
+                if form:
+                    for name, value in self.__form_options__.items():
                         setattr(form, name, value)
 
         if hasattr(self, '__form_new_options__'):
