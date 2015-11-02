@@ -52,7 +52,7 @@ setup(name='tgext.crud',
       zip_safe=True,
       install_requires=[
           "TurboGears2 >= 2.3.0",
-          'sprox >= 0.9.0',
+          'sprox >= 0.10.0',
       ],
       test_suite='nose.collector',
       tests_require=test_requirements,
