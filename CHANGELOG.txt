@@ -1,6 +1,8 @@
 0.8.0
 -----
 
+* __setters__ are no longer supported.
+* __form_new_options__ and __form_edit_options__ are now available to set options specific to new or edit forms.
 * get_all now logs exception when unable to retrieve data
 * post, put and delete now return the created/edited/deleted object when called from child class method
 * When subclassed error handler are now properly retrieved from the subclass when overridden.
