@@ -534,15 +534,13 @@ class EasyCrudRestController(CrudRestController):
                     for name, value in self.__form_options__.items():
                         setattr(form, name, value)
 
-        if hasattr(self, '__form_new_options__'):
+        if hasattr(self, '__form_new_options__') and self.new_form:
             for name, value in self.__form_new_options__.items():
-                if self.new_form:
-                    setattr(self.new_form, name, value)
+                setattr(self.new_form, name, value)
 
-        if hasattr(self, '__form_edit_options__'):
+        if hasattr(self, '__form_edit_options__') and self.edit_form:
             for name, value in self.__form_edit_options__.items():
-                if self.edit_form:
-                    setattr(self.edit_form, name, value)
+                setattr(self.edit_form, name, value)
 
         if hasattr(self, '__setters__'):
             raise ValueError('__setters__ are deprecated and no longer supported.')
