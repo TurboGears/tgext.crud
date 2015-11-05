@@ -372,6 +372,9 @@ class CrudRestController(RestController):
     @expose('jinja:tgext.crud.templates.edit')
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
+        if getattr(self, 'edit_form', None) is None:
+            abort(404)
+
         kw = map_args_to_pks(args, {})
 
         tmpl_context.widget = self.edit_form
@@ -386,6 +389,9 @@ class CrudRestController(RestController):
     @expose('jinja:tgext.crud.templates.new')
     def new(self, *args, **kw):
         """Display a page to show a new record."""
+        if getattr(self, 'new_form', None) is None:
+            abort(404)
+
         tmpl_context.widget = self.new_form
         return dict(value=kw, model=self.model.__name__)
 
