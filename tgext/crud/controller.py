@@ -495,6 +495,11 @@ class EasyCrudRestController(CrudRestController):
     that do not start with **__** will be threated as :class:`TableFiller` attributes
     apart from ``__actions__`` which is always assigned to the :class:`TableFiller`.
 
+    Usually ``_options`` fields will replace the previous values with theirs
+    in case a parent class provided previous values. You can avoid this behaviour
+    and extend the previous values using :func:`addopts` instead of dictionaries
+    and lists as the option values.
+
     """
     def __init__(self, session, menu_items=None):
         if not (hasattr(self, 'table') or hasattr(self, 'table_type')):
