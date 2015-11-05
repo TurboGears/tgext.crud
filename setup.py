@@ -5,7 +5,7 @@ version = '0.8.1'
 
 here = os.path.abspath(os.path.dirname(__file__))
 try:
-    README = open(os.path.join(here, 'README.txt')).read()
+    README = open(os.path.join(here, 'README.rst')).read()
     CHANGES = open(os.path.join(here, 'CHANGELOG.rst')).read()
 except IOError:
     README = CHANGES = ''
