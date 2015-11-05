@@ -497,9 +497,23 @@ class EasyCrudRestController(CrudRestController):
 
     Usually ``_options`` fields will replace the previous values with theirs
     in case a parent class provided previous values. You can avoid this behaviour
-    and extend the previous values using :func:`addopts` instead of dictionaries
+    and extend the previous values using :func:`.addopts` instead of dictionaries
     and lists as the option values.
 
+    :class attributes:
+
+        **__form_options__**
+            Sprox options that need to be applied to both EditableForm and AddRecordForm forms
+
+        **__form_new_options__**
+            Options that need to be applied only to AddRecordForm form
+
+        **__form_edit_options__**
+            Options that need to be applied only to EditableForm form
+
+        **__table_options__**
+            Options that need to be applied to TableBase and TableFiller
+    
     """
     def __init__(self, session, menu_items=None):
         if not (hasattr(self, 'table') or hasattr(self, 'table_type')):
