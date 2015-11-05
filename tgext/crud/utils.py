@@ -164,3 +164,53 @@ def redirect_on_completion(remainder, params, output):
     redirection = output.get('redirect')
     if redirection is not None:
         redirect(**redirection)
+
+
+def addopts(*args, **kwargs):
+    """Specifies options to be added to __form_options__ and __table_options__.
+
+    When options are specified using addopts like::
+
+        __form_options__ = {
+            '__omit_fields__': addopts('name', 'surname')
+        }
+
+    they get added to the current option value instead of replacing it.
+
+    In case of lists they always extend the list, so it's not possible to
+    change the order of the elements.
+
+    In case of dictionaries keys already in the option the value of the option
+    will be merged too if it's a dictionary or a list.
+    """
+    if args and kwargs:
+        raise ValueError('You cannot mix position and named arguments in addopts')
+
+    if args:
+        return _addoptslist(args)
+    elif kwargs:
+        return _addoptsdict(kwargs)
+    else:
+        raise ValueError('not positional or named arguments provided in addopts.')
+
+
+class _addoptslist(list):
+    def extend_option(self, obj, name):
+        value = getattr(obj, name, []) + self
+        setattr(obj, name, value)
+
+
+class _addoptsdict(dict):
+    def extend_option(self, obj, name):
+        value = getattr(obj, name, {}).copy()
+        for optname, optval in self.items():
+            curval = value.get(optname)
+            if isinstance(curval, list):
+                curval.extend(optval)
+            elif isinstance(curval, dict):
+                curval.update(optval)
+            else:
+                value[optname] = optval
+
+        setattr(obj, name, value)
+

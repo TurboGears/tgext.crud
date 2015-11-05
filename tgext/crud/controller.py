@@ -11,7 +11,8 @@ from tgext.crud.decorators import (registered_validate, register_validators, cat
 from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller,
                               set_table_filler_getter, SortableTableBase, map_args_to_pks,
                               adapt_params_for_pagination, allow_json_parameters, 
-                              force_response_type, redirect_on_completion)
+                              force_response_type, redirect_on_completion, _addoptsdict,
+                              _addoptslist)
 from sprox.providerselector import ProviderTypeSelector
 from sprox.formbase import AddRecordForm, EditableForm
 from sprox.fillerbase import RecordFiller, AddFormFiller
@@ -21,7 +22,7 @@ import warnings
 errors = ()
 try:
     from sqlalchemy.exc import IntegrityError, DatabaseError, ProgrammingError
-    errors =  (IntegrityError, DatabaseError, ProgrammingError)
+    errors = (IntegrityError, DatabaseError, ProgrammingError)
 except ImportError:
     pass
 
@@ -140,7 +141,7 @@ class CrudRestController(RestController):
     remember_values = []
     substring_filters = []
     search_fields = True  # True for automagic
-    json_dictify = False # True is slower but provides relations
+    json_dictify = False  # True is slower but provides relations
     conditional_update_field = None
     response_type = None
     provider_type_selector_type = ProviderTypeSelector
@@ -480,6 +481,7 @@ class CrudRestController(RestController):
         """This is the code that creates a confirm_delete page"""
         return dict(args=args)
 
+
 class EasyCrudRestController(CrudRestController):
     """A CrudRestController that provides a quick way to setup Sprox forms and Table.
 
@@ -532,26 +534,40 @@ class EasyCrudRestController(CrudRestController):
             for form in (self.edit_form, self.new_form):
                 if form:
                     for name, value in self.__form_options__.items():
-                        setattr(form, name, value)
+                        if isinstance(value, (_addoptsdict, _addoptslist)):
+                            value.extend_option(form, name)
+                        else:
+                            setattr(form, name, value)
 
         if hasattr(self, '__form_new_options__') and self.new_form:
             for name, value in self.__form_new_options__.items():
-                setattr(self.new_form, name, value)
+                if isinstance(value, (_addoptsdict, _addoptslist)):
+                    value.extend_option(self.new_form, name)
+                else:
+                    setattr(self.new_form, name, value)
 
         if hasattr(self, '__form_edit_options__') and self.edit_form:
             for name, value in self.__form_edit_options__.items():
-                setattr(self.edit_form, name, value)
+                if isinstance(value, (_addoptsdict, _addoptslist)):
+                    value.extend_option(self.edit_form, name)
+                else:
+                    setattr(self.edit_form, name, value)
 
         if hasattr(self, '__setters__'):
             raise ValueError('__setters__ are deprecated and no longer supported.')
 
         # Permit to quickly customize table options
         if hasattr(self, '__table_options__'):
-            for name, value in self.__table_options__.items():
-                if name.startswith('__') and name != '__actions__':
-                    for table_object in (self.table_filler, self.table):
-                        if table_object:
-                            setattr(table_object, name, value)
-                else:
-                    if self.table_filler:
+            if self.table_filler:
+                for name, value in self.__table_options__.items():
+                    if name == '__actions__':
                         set_table_filler_getter(self.table_filler, name, value)
+                    elif name.startswith('__'):
+                        setattr(self.table_filler, name, value)
+                    else:
+                        set_table_filler_getter(self.table_filler, name, value)
+
+            if self.table:
+                for name, value in self.__table_options__.items():
+                    if name.startswith('__') and name != '__actions__':
+                        setattr(self.table, name, value)
