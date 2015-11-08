@@ -2,7 +2,7 @@
 <%namespace name="menu_items" file="tgext.crud.templates.menu_items"/>
 
 <%def name="title()">
-${tmpl_context.title} - View ${model}
+${tmpl_context.title} - ${model}
 </%def>
 
 <%def name="body_class()">tundra</%def>
@@ -10,14 +10,13 @@ ${tmpl_context.title} - View ${model}
   ${menu_items.menu_style()}
   ${parent.meta()}
 </%def>
-<div>
-<h1>${model} Listing</h1>
-</div>
-<div>
-<a href='new/'>New</a> ${model}
-</div>
-<br/>
-${tmpl_context.widget() | n}
-</div>
-</body>
-</html>
+  <div id="main_content">
+    ${menu_items.menu_items(pk_count)}
+    <div id="crud_content">
+      <div class="crud_edit">
+        <h2>Edit ${model}</h2>
+         ${tmpl_context.widget(value=value, action='./') | n}
+      </div>
+    </div>
+  <div style="height:0px; clear:both;"> &nbsp; </div>
+  </div> <!-- end main_content -->
