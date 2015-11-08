@@ -1,13 +1,15 @@
 """
 """
 import logging
+from itertools import chain
+
 import tg
 from tg import expose, flash, redirect, tmpl_context, request, abort
 from tg.decorators import without_trailing_slash, with_trailing_slash, before_validate, before_render
 from tg.controllers import RestController
 
 from tgext.crud.decorators import (registered_validate, register_validators, catch_errors,
-                                   optional_paginate)
+                                   optional_paginate, apply_default_filters, map_primary_keys)
 from tgext.crud.utils import (SmartPaginationCollection, RequestLocalTableFiller,
                               set_table_filler_getter, SortableTableBase, map_args_to_pks,
                               adapt_params_for_pagination, allow_json_parameters, 
@@ -68,6 +70,13 @@ class CrudRestController(RestController):
             List of URL parameters that need to be kept around when redirecting between
             the various pages of the CRUD controller. Can be used to keep around filters
             or sorting when editing a subset of the models.
+
+        **filters**
+            Dictionary of filters that must be applied to queries. Those are only "equals to"
+            filters that can be used to limit objects to a subset of entries that have that
+            value. Filters are also applied on POST method to create new object which by
+            default have the value specified by the filter. If filter is callable it will
+            be called to retrieve the filter value.
 
         **search_fields**
             Enables searching on some fields, can be ``True``, ``False`` or a list
@@ -145,6 +154,7 @@ class CrudRestController(RestController):
     conditional_update_field = None
     response_type = None
     provider_type_selector_type = ProviderTypeSelector
+    filters = {}
     pagination = {'items_per_page': 7}
     resources = ( crud_style,
                   crud_script )
@@ -248,6 +258,17 @@ class CrudRestController(RestController):
         else:
             return _dictify(value)
 
+    def _get_object(self, params):
+        if self.filters:
+            queryfields = set(chain(self.provider.get_primary_fields(self.model),
+                                    self.filters.keys()))
+            filters = dict(t for t in params.items() if t[0] in queryfields)
+            _, val = self.provider.query(self.model, filters=filters, limit=1)
+            val = next(iter(val), None)
+        else:
+            val = self.provider.get_obj(self.model, params)
+        return val
+
     def __init__(self, session, menu_items=None):
         if hasattr(self, 'style'):
             warnings.warn('style attribute is not supported anymore, '
@@ -289,6 +310,7 @@ class CrudRestController(RestController):
     @expose('jinja:tgext.crud.templates.get_all')
     @expose('json:')
     @optional_paginate('value_list')
+    @apply_default_filters
     def get_all(self, *args, **kw):
         """Return all records.
            Pagination is done by offset/limit in the filler method.
@@ -348,13 +370,13 @@ class CrudRestController(RestController):
     @expose('mako:tgext.crud.templates.get_one')
     @expose('jinja:tgext.crud.templates.get_one')
     @expose('json:')
+    @map_primary_keys(argsonly=True)
+    @apply_default_filters
     def get_one(self, *args, **kw):
         """get one record, returns HTML or json"""
-        #this would probably only be realized as a json stream
-        kw = map_args_to_pks(args, {})
+        obj = self._get_object(kw)
 
         if tg.request.response_type == 'application/json':
-            obj = self.provider.get_obj(self.model, kw)
             if obj is None:
                 tg.response.status_code = 404
             elif self.conditional_update_field is not None:
@@ -363,6 +385,9 @@ class CrudRestController(RestController):
             return dict(model=self.model.__name__,
                         value=self._dictify(obj))
 
+        if obj is None:
+            abort(404)
+
         tmpl_context.widget = self.edit_form
         value = self.edit_filler.get_value(kw)
         return dict(value=value, model=self.model.__name__)
@@ -370,12 +395,16 @@ class CrudRestController(RestController):
     @expose('genshi:tgext.crud.templates.edit')
     @expose('mako:tgext.crud.templates.edit')
     @expose('jinja:tgext.crud.templates.edit')
+    @map_primary_keys(argsonly=True)
+    @apply_default_filters
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
         if getattr(self, 'edit_form', None) is None:
             abort(404)
 
-        kw = map_args_to_pks(args, {})
+        obj = self._get_object(kw)
+        if obj is None:
+            abort(404)
 
         tmpl_context.widget = self.edit_form
         value = self.edit_filler.get_value(kw)
@@ -398,6 +427,7 @@ class CrudRestController(RestController):
     @expose(content_type='text/html')
     @expose('json:', content_type='application/json')
     @before_validate(allow_json_parameters)
+    @apply_default_filters
     @before_render(redirect_on_completion)
     @registered_validate(error_handler='new')
     @catch_errors(errors, error_handler='new')
@@ -417,7 +447,8 @@ class CrudRestController(RestController):
     @expose(content_type='text/html')
     @expose('json:', content_type='application/json')
     @before_validate(allow_json_parameters)
-    @before_validate(map_args_to_pks)
+    @map_primary_keys()
+    @apply_default_filters
     @before_render(redirect_on_completion)
     @registered_validate(error_handler='edit')
     @catch_errors(errors, error_handler='edit')
@@ -432,7 +463,7 @@ class CrudRestController(RestController):
             if value is None or value == '':
                 omit_fields.append(remembered_value)
 
-        obj = self.provider.get_obj(self.model, kw)
+        obj = self._get_object(kw)
 
         #This should actually by done by provider.update to make it atomic
         can_modify = True
@@ -455,20 +486,23 @@ class CrudRestController(RestController):
             return dict(model=self.model.__name__,
                         value=self._dictify(obj))
 
+        if obj is None:
+            abort(404)
+
         pks = self.provider.get_primary_fields(self.model)
         return dict(obj=obj,
                     redirect=dict(base_url='../' * len(pks), params=self._kept_params()))
 
     @expose(content_type='text/html')
     @expose('json:', content_type='application/json')
+    @map_primary_keys(argsonly=True)
+    @apply_default_filters
     @before_render(redirect_on_completion)
     def post_delete(self, *args, **kw):
         """This is the code that actually deletes the record"""
-        kw = map_args_to_pks(args, {})
-
         obj = None
         if kw:
-            obj = self.provider.get_obj(self.model, kw)
+            obj = self._get_object(kw)
 
         if obj is not None:
             self.provider.delete(self.model, kw)

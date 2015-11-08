@@ -1,7 +1,7 @@
 """
 """
 from decorator import decorator
-from tg.decorators import validate as tgValidate
+from tg.decorators import validate as tgValidate, before_validate
 from tg import flash, config, request, response, tmpl_context
 from tgext.crud.validators import report_json_error
 from tgext.crud.utils import DisabledPager
@@ -9,6 +9,7 @@ from tg.decorators import paginate
 from tg.util import Bunch
 from tg.exceptions import HTTPOk
 from tgext.crud._compat import im_func, im_self, string_type, unicode_text
+from .utils import map_args_to_pks
 
 try:
     import transaction
@@ -152,3 +153,31 @@ class optional_paginate(paginate):
             return
 
         super(optional_paginate, self).before_render(remainder, params, output)
+
+
+class map_primary_keys(before_validate):
+    def __init__(self, argsonly=False):
+        if argsonly:
+            func = self.do_without_params
+        else:
+            func = self.do_with_params
+        super(map_primary_keys, self).__init__(func)
+
+    def do_without_params(self, remainder, params):
+        params.update(map_args_to_pks(remainder, {}))
+
+    def do_with_params(self, remainder, params):
+        params.update(map_args_to_pks(remainder, params))
+
+
+@before_validate
+def apply_default_filters(remainder, params):
+    controller = request.controller_state.controller
+    if controller.filters:
+        filters = {}
+        for key, value in controller.filters.items():
+            if callable(value):
+                filters[key] = value()
+            else:
+                filters[key] = value
+        params.update(filters)
