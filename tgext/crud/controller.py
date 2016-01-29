@@ -308,6 +308,7 @@ class CrudRestController(RestController):
     @expose('genshi:tgext.crud.templates.get_all')
     @expose('mako:tgext.crud.templates.get_all')
     @expose('jinja:tgext.crud.templates.get_all')
+    @expose('kajiki:tgext.crud.templates.get_all')
     @expose('json:')
     @optional_paginate('value_list')
     @apply_default_filters
@@ -369,6 +370,7 @@ class CrudRestController(RestController):
     @expose('genshi:tgext.crud.templates.get_one')
     @expose('mako:tgext.crud.templates.get_one')
     @expose('jinja:tgext.crud.templates.get_one')
+    @expose('kajiki:tgext.crud.templates.get_one')
     @expose('json:')
     @map_primary_keys(argsonly=True)
     @apply_default_filters
@@ -395,6 +397,7 @@ class CrudRestController(RestController):
     @expose('genshi:tgext.crud.templates.edit')
     @expose('mako:tgext.crud.templates.edit')
     @expose('jinja:tgext.crud.templates.edit')
+    @expose('kajiki:tgext.crud.templates.edit')
     @map_primary_keys(argsonly=True)
     @apply_default_filters
     def edit(self, *args, **kw):
@@ -416,6 +419,7 @@ class CrudRestController(RestController):
     @expose('genshi:tgext.crud.templates.new')
     @expose('mako:tgext.crud.templates.new')
     @expose('jinja:tgext.crud.templates.new')
+    @expose('kajiki:tgext.crud.templates.new')
     def new(self, *args, **kw):
         """Display a page to show a new record."""
         if getattr(self, 'new_form', None) is None:

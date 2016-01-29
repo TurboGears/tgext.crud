@@ -1,12 +1,10 @@
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:py="http://genshi.edgewall.org/"
-      xmlns:xi="http://www.w3.org/2001/XInclude">
+<html py:extends="master.xhtml" py:strip="True">
 
-<xi:include href="master.html" />
-<head>
-    <title>${tmpl_context.title} - Edit ${model}</title>
+<head py:block="head" py:strip="True">
+    <title py:block="master_title">${tmpl_context.title} - Edit ${model}</title>
 </head>
-<body class="tundra">
+
+<body py:block="body" py:strip="True">
   <div id="crud_leftbar">
         <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
             <li py:for="lower, item in sorted(tmpl_context.menu_items.items())">

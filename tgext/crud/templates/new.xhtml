@@ -1,0 +1,23 @@
+<html py:extends="master.xhtml" py:strip="True">
+
+<head py:block="head" py:strip="True">
+    <title py:block="master_title">${tmpl_context.title} - New ${model}</title>
+</head>
+
+<body py:block="body" py:strip="True">
+  <div id="crud_leftbar">
+        <ul id="menu_items" py:if="hasattr(tmpl_context, 'menu_items')">
+            <li py:for="lower, item in sorted(tmpl_context.menu_items.items())">
+                <a href="${tmpl_context.crud_helpers.make_link(lower)}">$item</a>
+            </li>
+       </ul>
+  </div>
+  <div id="crud_content">
+      <div class="crud_add">
+        <h2>New $model</h2>
+         ${Markup(tmpl_context.widget(value=value, action='./'))}
+      </div>
+  </div>
+  <div style="clear:both;"/>
+</body>
+</html>
