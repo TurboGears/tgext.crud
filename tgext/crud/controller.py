@@ -78,6 +78,11 @@ class CrudRestController(RestController):
             default have the value specified by the filter. If filter is callable it will
             be called to retrieve the filter value.
 
+            For example to display a crud that only shows, creates and edits entities
+            owned by logged user through a user_id ForeignKey you can use a filter like::
+
+                {'user_id': lambda: request.identity['user'].user_id}
+
         **search_fields**
             Enables searching on some fields, can be ``True``, ``False`` or a list
             of fields for which searching should be enabled.
