@@ -88,6 +88,7 @@ class CrudTest(object):
         conf.disable_request_extensions = False
         conf.prefer_toscawidgets2 = True
         conf.use_transaction_manager = True
+        conf['tm.enabled'] = True
         conf['sqlalchemy.url'] = 'sqlite:///:memory:'
 
         self.app = TestApp(conf.make_wsgi_app())
