@@ -50,6 +50,7 @@ class registered_validate(tgValidate):
 
         self._error_handler = error_handler
         self.needs_controller = True
+        self.chain_validation = False
         class Validators(object):
             def validate(self, controller, params, state):
                 func_name = im_func(controller).__name__
