@@ -73,7 +73,7 @@ class SortableTableBase(TableBase):
                 options = {'sort_field':field[0], 'xml':field[0] in args['xml_fields']}
                 field_info = {'name':field[0], 'getter':field[1], 'title':field[0], 'options':options}
 
-            if field_info['name'] in entity_fields and not self.__provider__.is_relation(self.__entity__, field_info['name']):
+            if field_info['name'] in entity_fields:
                 field = SortableColumn(field_info['name'],
                                        getter=field_info['getter'],
                                        title=field_info['title'],
