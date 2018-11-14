@@ -117,3 +117,47 @@ class TestCrudHTMLSearch(CrudTest):
         result = self.app.get('/movies/?actors=James%20Who')
         assert 'First Movie' in result, result
         assert 'Second Movie' not in result, result
+
+
+class TestCrudHTMLSort(CrudTest):
+    def controller_factory(self):
+        class MovieController(EasyCrudRestController):
+            model = Movie
+
+        class CrudHTMLController(TGController):
+            movies = MovieController(DBSession)
+
+        return CrudHTMLController()
+
+    def setUp(self):
+        super(TestCrudHTMLSort, self).setUp()
+        genre = Genre(name='action')
+        DBSession.add(genre)
+
+        actors = [Actor(name='James Who'), Actor(name='John Doe'), Actor(name='Man Alone')]
+        list(map(DBSession.add, actors))
+
+        DBSession.add(Movie(title='First Movie', genre=genre, actors=actors[:2]))
+        DBSession.add(Movie(title='Second Movie', genre=genre, actors=[actors[2]]))
+        DBSession.add(Movie(title='Third Movie', genre=genre))
+        DBSession.add(Movie(title='Fourth Movie', genre=genre))
+        DBSession.add(Movie(title='Fifth Movie'))
+        DBSession.add(Movie(title='Sixth Movie', actors=[actors[0]]))
+        DBSession.flush()
+        transaction.commit()
+
+    def test_sort_by_text(self):
+        result = self.app.get('/movies/?order_by=title')
+        movies = [
+            line.strip() for line in result.text.split('\n') if 'Movie' in line
+        ][2:]
+        assert movies == ['Fifth Movie', 'First Movie', 'Fourth Movie',
+                          'Second Movie', 'Sixth Movie', 'Third Movie']
+
+    def test_sort_by_relation(self):
+        result = self.app.get('/movies/?order_by=actors&desc=1')
+        movies = [
+            line.strip() for line in result.text.split('\n') if 'Movie' in line
+        ][2:]
+        assert movies == ['Second Movie', 'First Movie', 'Sixth Movie',
+                          'Third Movie', 'Fourth Movie', 'Fifth Movie']
