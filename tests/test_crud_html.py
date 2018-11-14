@@ -152,7 +152,7 @@ class TestCrudHTMLSort(CrudTest):
             line.strip() for line in result.text.split('\n') if 'Movie' in line
         ][2:]
         assert movies == ['Fifth Movie', 'First Movie', 'Fourth Movie',
-                          'Second Movie', 'Sixth Movie', 'Third Movie']
+                          'Second Movie', 'Sixth Movie', 'Third Movie'], movies
 
     def test_sort_by_relation(self):
         result = self.app.get('/movies/?order_by=actors&desc=1')
@@ -160,4 +160,4 @@ class TestCrudHTMLSort(CrudTest):
             line.strip() for line in result.text.split('\n') if 'Movie' in line
         ][2:]
         assert movies == ['Second Movie', 'First Movie', 'Sixth Movie',
-                          'Third Movie', 'Fourth Movie', 'Fifth Movie']
+                          'Third Movie', 'Fourth Movie', 'Fifth Movie'], movies
