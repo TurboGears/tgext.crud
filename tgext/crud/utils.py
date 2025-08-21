@@ -132,7 +132,13 @@ class DisabledPager(object):
         return ''
 
 def map_args_to_pks(remainder, params):
-    controller = request.controller_state.controller
+    try:
+        controller = request._dispatch_state.controller
+    except:
+        try:
+            controller = request._controller_state.controller
+        except:
+            controller = request.controller_state.controller
 
     pks = controller.provider.get_primary_fields(controller.model)
     for i, pk in enumerate(pks):
