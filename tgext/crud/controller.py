@@ -2,6 +2,7 @@
 """
 import logging
 from itertools import chain
+import urllib
 
 import tg
 from tg import expose, flash, redirect, tmpl_context, request, abort
@@ -28,7 +29,7 @@ try:
 except ImportError:
     pass
 
-import cgi, inspect
+import inspect
 from tgext.crud._compat import url_parse, string_type, unicode_text
 
 log = logging.getLogger('tgext.crud')
@@ -197,7 +198,7 @@ class CrudRestController(RestController):
             from_referer = {}
         else:
             parsed = url_parse(request.referer)
-            from_referer = dict(cgi.parse_qsl(parsed.query))
+            from_referer = dict(urllib.parse.parse_qsl(parsed.query))
         from_referer.update(request.params)
 
         pass_params = {}

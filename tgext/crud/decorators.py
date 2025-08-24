@@ -22,23 +22,23 @@ class registered_validate(tgValidate):
     This is especially useful when you have a controller lookup that instantiates
     a controller who's forms are created at execution time.  This
     allows controller methods to validate on forms which are different.
-    Otherwise, each method of the controller would have to share the 
+    Otherwise, each method of the controller would have to share the
     same method of validation.
-    
+
     :Usage:
-     
+
     >>> from tg.controllers import TGController
     >>> class MyController(TGController):
-    >>>     
+    >>>
     >>>     def __init__(self, params):
     >>>         self.form = MyForm(params)
     >>>         register_validators(self, 'eval_form', self.form)
-    >>>     
+    >>>
     >>>     @expose('myproject.templates.error_handler')
     >>>     def render_form(self):
     >>>         tg.tg_context.form = self.form
     >>>         return
-    >>>     
+    >>>
     >>>     @registered_validate(error_controller=render_form)
     >>>     @expose()
     >>>     def eval_form(self):
@@ -75,7 +75,7 @@ class registered_validate(tgValidate):
             action = getattr(controller, self._error_handler)
             return getattr(action, '__func__', getattr(action, 'im_func', action))
 
-        
+
 def register_validators(controller, name, validators):
     """
     Helper function which sets the validator lookup for the controller.
@@ -95,15 +95,15 @@ def catch_errors(error_types=None, error_handler=None):
     A validator which catches the Exceptions in the error_types.
     When an exception occurs inside the decorated function, the error_handler
     is called, and the message from the exception is flashed to the screen.
-    
+
     :Usage:
-    
+
     >>> from tg.controllers import TGController
     >>> class MyController(TGController):
     >>>     @expose('myproject.templates.error_handler')
     >>>     def error_handler(self):
     >>>         return
-    >>>     
+    >>>
     >>>     @catch_errors(Exception, error_handler='error_handler')
     >>>     @expose()
     >>>     def method_with_exception(self):
@@ -173,7 +173,14 @@ class map_primary_keys(before_validate):
 
 @before_validate
 def apply_default_filters(remainder, params):
-    controller = request.controller_state.controller
+    try:
+        controller = request.dispatch_state.controller
+    except:
+        try:
+            controller = request._controller_state.controller
+        except:
+            controller = request.controller_state.controller
+
     if controller.filters:
         filters = {}
         for key, value in controller.filters.items():
