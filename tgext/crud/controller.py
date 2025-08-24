@@ -29,7 +29,7 @@ try:
 except ImportError:
     pass
 
-import cgi, inspect
+import inspect
 from tgext.crud._compat import url_parse, string_type, unicode_text
 
 log = logging.getLogger('tgext.crud')
