@@ -133,7 +133,7 @@ class DisabledPager(object):
 
 def map_args_to_pks(remainder, params):
     try:
-        controller = request._dispatch_state.controller
+        controller = request.dispatch_state.controller
     except:
         try:
             controller = request._controller_state.controller

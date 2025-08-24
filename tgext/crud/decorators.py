@@ -174,7 +174,7 @@ class map_primary_keys(before_validate):
 @before_validate
 def apply_default_filters(remainder, params):
     try:
-        controller = request._dispatch_state.controller
+        controller = request.dispatch_state.controller
     except:
         try:
             controller = request._controller_state.controller
